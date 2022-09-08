@@ -1,6 +1,8 @@
 # data and working directories
 data/
 workdirs/
+.idea/
+data/datasets/
 
 
 # IDE and OS cache
