@@ -55,7 +55,7 @@ if __name__ == "__main__":
         _DATASET_TARGET_FUNCTION = _dataset_target_function_regression
 
     N_TRAINING = 1
-    N_EXPLAIN = 10000
+    N_EXPLAIN = 1000
 
     # Incremental Definitions
     USE_INCREMENTAL_SAGE = True
