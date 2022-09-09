@@ -11,7 +11,7 @@ from abc import abstractmethod
 
 import numpy as np
 
-from sampling.sampler import BatchSampler, ReservoirSampler
+from sampling.sampler import BatchSampler, ReservoirSampler, HistogramSampler
 from utils.trackers import WelfordTracker
 
 __all__ = [
@@ -79,7 +79,8 @@ class IncrementalSAGE(BaseIncrementalExplainer):
             loss_function='mse',
             random_state=None,
             sub_sample_size=1,
-            empty_prediction=None
+            empty_prediction=None,
+            default_values: list = None
     ):
         super(IncrementalSAGE, self).__init__(
             model_fn=model_fn,
@@ -92,9 +93,12 @@ class IncrementalSAGE(BaseIncrementalExplainer):
             self.loss_function = mae_loss
         else:
             self.loss_function = mse_loss
-        #self.sampler = BatchSampler(feature_names=feature_names, store_targets=False)  # TODO add incremental sampler
-        self.sampler = ReservoirSampler(feature_names=feature_names, store_targets=False,
-                                        reservoir_length=100, sample_with_replacement=False)
+        self.default_values = default_values
+        if default_values is None:
+            self.sampler = BatchSampler(feature_names=feature_names, store_targets=False)
+        else:
+            self.default_values = {feature: default_values[i] for feature, i in zip(feature_names, range(len(feature_names)))}
+        #self.sampler = ReservoirSampler(feature_names=feature_names, store_targets=False, reservoir_length=100, sample_with_replacement=False)
         self.marginal_prediction = WelfordTracker()
         self.sub_sample_size = sub_sample_size
         self.SAGE_values = {feature_name: WelfordTracker() for feature_name in feature_names}
@@ -105,14 +109,18 @@ class IncrementalSAGE(BaseIncrementalExplainer):
         self.sampler.update(x, y)
 
     def explain_one(self, x_i, y_i):
-        if self.seen_samples <= 10:
+        if self.seen_samples <= 10:  # TODO remove warmup-phase
             self.seen_samples += 1
-            self._update_sampler(x_i, y_i)
+            if self.default_values is None:
+                self._update_sampler(x_i, y_i)
             return self.SAGE_values
         permutation_chain = np.random.permutation(self.feature_names)
         # x_marginal, _ = self.sampler.sample(k=1, last_k=False, sampling_strategy='product')
-        x_marginal, _ = self.sampler.sample(k=1)
-        empty_prediction = self.model_fn(x_marginal[0]) if self.update_empty_prediction else self.empty_prediction
+        if self.default_values is None:
+            x_marginal, _ = self.sampler.sample(k=1)
+        else:
+            x_marginal = [self.default_values]
+        empty_prediction = self.model_fn(x_marginal[0])[0] if self.update_empty_prediction else self.empty_prediction
         self.marginal_prediction.update(empty_prediction)
         sample_loss = self.loss_function(y_true=y_i, y_prediction=self.marginal_prediction.mean)
         x_S = {}
@@ -120,11 +128,14 @@ class IncrementalSAGE(BaseIncrementalExplainer):
             x_S[feature] = x_i[feature]
             y = 0
             # x_marginals, _ = self.sampler.sample(k=self.sub_sample_size, last_k=False)
-            x_marginals, _ = self.sampler.sample(k=self.sub_sample_size)
+            if self.default_values is None:
+                x_marginals, _ = self.sampler.sample(k=self.sub_sample_size)
+            else:
+                x_marginals = [self.default_values]
             k = 0
             while k < self.sub_sample_size:
                 x_marginal = {**x_marginals[k], **x_S}
-                y += self.model_fn(x_marginal)
+                y += self.model_fn(x_marginal)[0]
                 k += 1
             y /= k
             feature_loss = self.loss_function(y_true=y_i, y_prediction=y)
@@ -132,5 +143,6 @@ class IncrementalSAGE(BaseIncrementalExplainer):
             self.SAGE_values[feature].update(marginal_contribution)
             sample_loss = feature_loss
         self.seen_samples += 1
-        self._update_sampler(x_i, y_i)
+        if self.default_values is None:
+            self._update_sampler(x_i, y_i)
         return self.SAGE_values

@@ -23,12 +23,14 @@ class RiverToPredictionFunction:
         self.feature_names = feature_names
 
     def predict(self, x: Sequence) -> np.ndarray:
-        y_pred = np.empty(shape=len(x))
         if isinstance(x, np.ndarray):
+            y_pred = np.empty(shape=len(x))
             for i, (x_i, _) in enumerate(stream.iter_array(x, feature_names=self.feature_names)):
                 if i > len(x):
                     break
                 y_pred[i] = self.river_model.predict_one(x_i)
+        elif isinstance(x, dict):
+            y_pred = np.asarray([self.river_model.predict_one(x)])
         else:
             # TODO implement for non-numpy x inputs also a fast prediction
             raise NotImplementedError("Currently only numpy arrays can be used for prediction.")
