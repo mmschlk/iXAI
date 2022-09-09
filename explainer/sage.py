@@ -11,7 +11,7 @@ from abc import abstractmethod
 
 import numpy as np
 
-from sampling.sampler import BatchSampler, ReservoirSampler, HistogramSampler
+from sampling.sampler import BatchSampler, ReservoirSampler
 from utils.trackers import WelfordTracker
 
 __all__ = [

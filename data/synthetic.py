@@ -1,9 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional
 
-import pandas as pd
 from numpy import ndarray
-from sklearn.utils import shuffle
 import river
 import numpy as np
 

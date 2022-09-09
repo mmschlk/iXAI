@@ -102,3 +102,6 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+# remove experiment code from package
+/experiments
