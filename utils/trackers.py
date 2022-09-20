@@ -9,8 +9,37 @@ from typing import Union
 import numpy as np
 
 
+__all__ = [
+    "WelfordTracker",
+    "ExponentialSmoothingTracker",
+    "SlidingWindowTracker",
+]
+
+
+# =============================================================================
+# Base Tracker Class
+# =============================================================================
+
+
+class BaseTracker:
+
+    def __init__(self):
+        self.tracked_value = 0
+
+    def __repr__(self):
+        return f"{round(self.tracked_value, 2)}"
+
+    def __call__(self, *args, **kwargs):
+        return self.tracked_value
+
+
+# =============================================================================
+# Public Tracker Class
+# =============================================================================
+
+
 # TODO write tests for all Trackers
-class WelfordTracker:
+class WelfordTracker(BaseTracker):
     """ A Tracker that applies Welford's Algorithm to estimate the mean and variance of a sequence.
 
     Notes
@@ -18,8 +47,8 @@ class WelfordTracker:
     Taken and adapted from Ian Covert's SAGE implementation.
     """
     def __init__(self):
+        super().__init__()
         self.N = 0
-        self.mean = 0
         self.sum_squares = 0
 
     def update(self, value_i: Union[int, float]):
@@ -31,16 +60,10 @@ class WelfordTracker:
             numeric value to be added to the tracker
         """
         self.N += 1
-        difference_1 = value_i - self.mean
-        self.mean += difference_1 / self.N
-        difference_2 = value_i - self.mean
+        difference_1 = value_i - self.tracked_value
+        self.tracked_value += difference_1 / self.N
+        difference_2 = value_i - self.tracked_value
         self.sum_squares += difference_1 * difference_2
-
-    def __call__(self, *args, **kwargs):
-        return self.mean
-
-    def __repr__(self):
-        return f"mean: {round(self.mean, 2)}, var: {round(self.var, 2)}"
 
     @property
     def var(self):
@@ -52,13 +75,18 @@ class WelfordTracker:
         """Returns the standard deviation of the stream"""
         return self.var ** 0.5
 
+    @property
+    def mean(self):
+        """Returns the mean the stream"""
+        return self.tracked_value
 
-class ExponentialSmoothingTracker:
+
+class ExponentialSmoothingTracker(BaseTracker):
     """A Tracker that applies Exponential Smoothing on the numeric input values"""
 
     def __init__(self, alpha: float):
         assert 0 <= alpha <= 1, "Alpha must be set to a value in between zero and one. [0,1]."
-        self.estimate = 0
+        super().__init__()
         self.alpha = alpha
 
     def update(self, value_i: Union[int, float]):
@@ -69,10 +97,7 @@ class ExponentialSmoothingTracker:
         value_i : number (int or float)
             numeric value to be added to the tracker
         """
-        self.estimate = (1 - self.alpha) * self.estimate + self.alpha * value_i
-
-    def __call__(self, *args, **kwargs):
-        return self.estimate
+        self.tracked_value = (1 - self.alpha) * self.tracked_value + self.alpha * value_i
 
 
 class SlidingWindowTracker:
@@ -104,17 +129,20 @@ class SlidingWindowTracker:
         """Returns the current mean of the sliding window"""
         return self.mean
 
+    def __repr__(self):
+        return f"{round(self.mean, 2)}"
+
     @property
     def mean(self):
         """Returns the current mean of the sliding window"""
-        return np.mean(self.sliding_window, axis=0)
+        return float(np.mean(self.sliding_window, axis=0))
 
     @property
     def var(self):
         """Returns the variance of the sliding window"""
-        return np.var(self.sliding_window, axis=0)
+        return float(np.var(self.sliding_window, axis=0))
 
     @property
     def std(self):
         """Returns the standard deviation of the sliding window"""
-        return np.std(self.sliding_window, axis=0)
+        return float(np.std(self.sliding_window, axis=0))

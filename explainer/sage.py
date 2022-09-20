@@ -12,7 +12,7 @@ from abc import abstractmethod
 import numpy as np
 
 from sampling.sampler import BatchSampler, ReservoirSampler, HistogramSampler
-from utils.trackers import WelfordTracker
+from utils.trackers import WelfordTracker, ExponentialSmoothingTracker
 
 __all__ = [
     "IncrementalSAGE",
@@ -95,52 +95,56 @@ class IncrementalSAGE(BaseIncrementalExplainer):
             self.loss_function = mse_loss
         self.default_values = default_values
         if default_values is None:
-            self.sampler = BatchSampler(feature_names=feature_names, store_targets=False)
+            self.sampler = ReservoirSampler(feature_names=feature_names,
+                                            constant_probability=1.,
+                                            store_targets=False,
+                                            reservoir_length=300,
+                                            sample_with_replacement=False)
         else:
             self.default_values = {feature: default_values[i] for feature, i in zip(feature_names, range(len(feature_names)))}
-        #self.sampler = ReservoirSampler(feature_names=feature_names, store_targets=False, reservoir_length=100, sample_with_replacement=False)
-        self.marginal_prediction = WelfordTracker()
         self.sub_sample_size = sub_sample_size
-        self.SAGE_values = {feature_name: WelfordTracker() for feature_name in feature_names}
-        self.empty_prediction = 0 if empty_prediction is None else empty_prediction
-        self.update_empty_prediction = True if empty_prediction is None else False  # flag if empty prediction must be updated
+        self.marginal_prediction = ExponentialSmoothingTracker(alpha=0.005)
+        self.SAGE_trackers = {feature_name: ExponentialSmoothingTracker(alpha=0.005) for feature_name in feature_names}
+        self.pfi_trackers = {feature_name: ExponentialSmoothingTracker(alpha=0.005) for feature_name in feature_names}
+
+    @property
+    def SAGE_values(self):
+        return {feature_name: float(self.SAGE_trackers[feature_name].tracked_value) for feature_name in self.feature_names}
 
     def _update_sampler(self, x, y):
         self.sampler.update(x, y)
 
     def explain_one(self, x_i, y_i):
-        if self.seen_samples <= 10:  # TODO remove warmup-phase
+        if self.seen_samples < 1:  # TODO remove warmup-phase
             self.seen_samples += 1
             if self.default_values is None:
                 self._update_sampler(x_i, y_i)
             return self.SAGE_values
         permutation_chain = np.random.permutation(self.feature_names)
-        # x_marginal, _ = self.sampler.sample(k=1, last_k=False, sampling_strategy='product')
         if self.default_values is None:
             x_marginal, _ = self.sampler.sample(k=1)
         else:
             x_marginal = [self.default_values]
-        empty_prediction = self.model_fn(x_marginal[0])[0] if self.update_empty_prediction else self.empty_prediction
-        self.marginal_prediction.update(empty_prediction)
-        sample_loss = self.loss_function(y_true=y_i, y_prediction=self.marginal_prediction.mean)
+        marginal_prediction = self.model_fn(x_marginal[0])[0]
+        self.marginal_prediction.update(marginal_prediction)
+        sample_loss = self.loss_function(y_true=y_i, y_prediction=self.marginal_prediction())
         x_S = {}
         for feature in permutation_chain:
             x_S[feature] = x_i[feature]
             y = 0
-            # x_marginals, _ = self.sampler.sample(k=self.sub_sample_size, last_k=False)
             if self.default_values is None:
                 x_marginals, _ = self.sampler.sample(k=self.sub_sample_size)
             else:
-                x_marginals = [self.default_values]
+                x_marginals = [self.default_values for _ in range(self.sub_sample_size)]
             k = 0
-            while k < self.sub_sample_size:
+            while k < min(self.sub_sample_size, len(x_marginals)):
                 x_marginal = {**x_marginals[k], **x_S}
                 y += self.model_fn(x_marginal)[0]
                 k += 1
             y /= k
             feature_loss = self.loss_function(y_true=y_i, y_prediction=y)
             marginal_contribution = sample_loss - feature_loss
-            self.SAGE_values[feature].update(marginal_contribution)
+            self.SAGE_trackers[feature].update(marginal_contribution)
             sample_loss = feature_loss
         self.seen_samples += 1
         if self.default_values is None:
