@@ -1,9 +1,7 @@
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Optional, Sequence, List
+from typing import Callable, Optional
 
-import pandas as pd
 from numpy import ndarray
-from sklearn.utils import shuffle
 import river
 import numpy as np
 
@@ -91,6 +89,7 @@ class SyntheticDataset(BaseSyntheticDataset):
 
     def __init__(
             self,
+            classification: bool = False,
             target_function: Callable = None,
             n_samples: int = 10000,
             n_features: int = 15,
@@ -100,6 +99,7 @@ class SyntheticDataset(BaseSyntheticDataset):
             noise_std: float = 0.,
             random_seed: Optional[int] = None
     ):
+        self.classification = classification
         np.random.seed(random_seed)
         self.n_samples = n_samples
         self.n_features = n_features
@@ -137,7 +137,10 @@ class SyntheticDataset(BaseSyntheticDataset):
 
     def _create_y_data(self, x_data):
         y_data = np.apply_along_axis(self.target_function, arr=x_data, axis=1)
-        y_data = y_data + np.random.normal(self._noise_mean, self._noise_std, len(y_data))
+        if self.classification:
+            y_data = y_data.astype(int)
+        else:
+            y_data = y_data + np.random.normal(self._noise_mean, self._noise_std, len(y_data))
         return y_data
 
 
