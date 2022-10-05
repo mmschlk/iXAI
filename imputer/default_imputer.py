@@ -11,7 +11,5 @@ class DefaultImputer(BaseImputer):
         new_x_i = x_i.copy()
         for key in feature_subset:
             new_x_i[key] = values[key]
-        print(x_i)
-        print(new_x_i)
         prediction = model.predict_one(new_x_i)
         return [prediction]
