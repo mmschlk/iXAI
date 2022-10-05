@@ -36,7 +36,7 @@ if __name__ == "__main__":
     #     return _dataset_target_function(x_list)
 
     TRAIN_TIME = 1000
-    TEST_TIME = 1002
+    TEST_TIME = 1010
 
     n_samples = 10000
     dataset = SyntheticDataset(n_numeric=_N_FEATURES, n_features=_N_FEATURES,
