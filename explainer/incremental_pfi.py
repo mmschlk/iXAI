@@ -67,9 +67,8 @@ class IncrementalPFI(BaseIncrementalExplainer):
             loss = mse_loss(y_i, prediction)
         return loss
 
-    # TODO - change name to tracked value
     @property
     def pfi_values(self):
         return {feature_name:
-                float(self.pfi_trackers[feature_name].estimate)
+                float(self.pfi_trackers[feature_name].tracked_value)
                 for feature_name in self.feature_names}
