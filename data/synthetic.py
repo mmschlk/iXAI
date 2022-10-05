@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 
 from numpy import ndarray
 import river
@@ -46,7 +46,8 @@ class BaseSyntheticDataset(metaclass=ABCMeta):
         :return: data stream as an iterator of dictionary data samples
         :rtype: river.base.typing.Stream
         """
-        return river.stream.iter_array(self.x_data, self.y_data, feature_names=self.feature_names)
+        return river.stream.iter_array(self.x_data, self.y_data,
+                                       feature_names=self.feature_names)
 
 
 # =============================================================================
