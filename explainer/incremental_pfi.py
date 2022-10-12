@@ -2,7 +2,7 @@ from explainer.base_incremental_explainer import BaseIncrementalExplainer
 import numpy as np
 from utils.trackers import ExponentialSmoothingTracker
 from utils.loss_functions import mse_loss, mae_loss
-from imputer.default_imputer import DefaultImputer
+# from imputer.default_imputer import DefaultImputer
 
 __all__ = [
     "IncrementalPFI",
@@ -18,7 +18,8 @@ class IncrementalPFI(BaseIncrementalExplainer):
             storage,
             imputer,
             loss_function='mse',
-            nsamples: int = 5
+            nsamples: int = 5,
+            alpha: float = 0.005
     ):
         super(IncrementalPFI, self).__init__(
             model=model
@@ -27,8 +28,9 @@ class IncrementalPFI(BaseIncrementalExplainer):
         self.loss_function = loss_function
         self.storage = storage
         self.imputer = imputer
+        self.alpha = alpha
         self.pfi_trackers = {feature_name:
-                             ExponentialSmoothingTracker(alpha=0.005)
+                             ExponentialSmoothingTracker(alpha=self.alpha)
                              for feature_name in feature_names}
         self.nsamples = nsamples
 
@@ -40,13 +42,8 @@ class IncrementalPFI(BaseIncrementalExplainer):
         self.storage.update(x_i, y_i)
         for feature in self.feature_names:
             feature_subset = [feature]
-            if isinstance(self.imputer, DefaultImputer):
-                predictions = self.imputer.impute(self.model,
-                                                  feature_subset, x_i)
-            else:
-                predictions = self.imputer.impute(self.model, self.storage,
-                                                  nsamples, feature_subset,
-                                                  x_i)
+            predictions = self.imputer.impute(feature_subset,
+                                              x_i, nsamples)
             losses = []
             for prediction in predictions:
                 loss = self._calculate_loss(y_i, prediction)
