@@ -17,5 +17,8 @@ class BaseStorage(ABC):
     def update(self, x: Dict, y: Optional[Any]):
         raise NotImplementedError
 
+    def __len__(self):
+        return len(self._storage_x)
+
     def get_data(self):
         return (self._storage_x, self._storage_y)
