@@ -3,6 +3,7 @@ from .interval_storage import IntervalStorage
 from .reservoir_storage import ReservoirStorage
 from .uniform_reservoir_storage import UniformReservoirStorage
 from .geometric_reservoir_storage import GeometricReservoirStorage
+from .sequence_storage import SequenceStorage
 
 __all__ = [
     "UniformReservoirStorage",
