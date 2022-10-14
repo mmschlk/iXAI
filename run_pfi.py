@@ -2,10 +2,10 @@ from data.synthetic import SyntheticDataset
 import numpy as np
 from river.ensemble import AdaptiveRandomForestRegressor
 from river import metrics
-from storage import UniformReservoirStorage
-from imputer import DefaultImputer
+from increment_explain.storage import UniformReservoirStorage
+from increment_explain.imputer import DefaultImputer
 # from imputer.default_imputer import DefaultImputer
-from explainer.incremental_pfi import IncrementalPFI
+from increment_explain.explainer.incremental_pfi import IncrementalPFI
 # from utils.converters import RiverToPredictionFunction
 
 
