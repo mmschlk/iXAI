@@ -1,4 +1,4 @@
-from explainer.base_incremental_explainer import BaseIncrementalExplainer
+from .base_incremental_explainer import BaseIncrementalExplainer
 import numpy as np
 from utils.trackers import ExponentialSmoothingTracker
 from utils.loss_functions import mse_loss, mae_loss
