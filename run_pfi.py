@@ -3,7 +3,8 @@ import numpy as np
 from river.ensemble import AdaptiveRandomForestRegressor
 from river import metrics
 from increment_explain.storage import UniformReservoirStorage
-from increment_explain.imputer import DefaultImputer
+# from increment_explain.imputer import DefaultImputer
+from increment_explain.imputer import MarginalImputer
 # from imputer.default_imputer import DefaultImputer
 from increment_explain.explainer.incremental_pfi import IncrementalPFI
 # from utils.converters import RiverToPredictionFunction
@@ -42,8 +43,9 @@ if __name__ == "__main__":
 
     # Instantiating objects
     storage = UniformReservoirStorage(store_targets=True, size=300)
-    # imputer = MarginalImputer(model, 'joint', storage)
-    imputer = DefaultImputer(model, values={'N_1': 5, 'N_2': 3, 'N_10': 2})
+    # storage = SequenceStorage(store_targets=True)
+    imputer = MarginalImputer(model, 'product', storage)
+    # imputer = DefaultImputer(model, values={'N_1': 5, 'N_2': 3, 'N_10': 2})
     explainer = IncrementalPFI(model, feature_list, storage, imputer, 'mse')
 
     for (n, (x_i, y_i)) in enumerate(stream):
