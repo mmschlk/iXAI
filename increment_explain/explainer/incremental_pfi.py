@@ -39,7 +39,6 @@ class IncrementalPFI(BaseIncrementalExplainer):
             nsamples = self.nsamples
         original_prediction = self.model.predict_one(x_i)
         original_loss = self._calculate_loss(y_i, original_prediction)
-        self.storage.update(x_i, y_i)
         for feature in self.feature_names:
             feature_subset = [feature]
             predictions = self.imputer.impute(feature_subset,
@@ -52,6 +51,7 @@ class IncrementalPFI(BaseIncrementalExplainer):
             # TODO - keep argument for ratio/constant in init - separate issue
             pfi = avg_loss - original_loss
             self._update_pfi(pfi, feature)
+        self.storage.update(x_i, y_i)
         return self.pfi_values
 
     def _update_pfi(self, value, feature):
