@@ -1,7 +1,8 @@
 import pytest
-from increment_explain.storage import (BatchStorage, IntervalStorage, SequenceStorage,
-                     UniformReservoirStorage, GeometricReservoirStorage)
-from collections import Counter
+from increment_explain.storage import (BatchStorage, IntervalStorage,
+                                       SequenceStorage,
+                                       UniformReservoirStorage,
+                                       GeometricReservoirStorage)
 
 
 @pytest.fixture
@@ -59,14 +60,10 @@ def test_sequence_storage(dummy_stream, store_targets):
 @pytest.mark.parametrize("store_targets", [True, False])
 @pytest.mark.parametrize("size", [3, 5])
 def test_uniform_reservoir_storage(dummy_stream, store_targets, size):
-    storage = UniformReservoirStorage(store_targets=store_targets, size=size)
-    reservoir_values = []
-    for _ in range(1000):
-        for x_i, y_i in dummy_stream:
-            storage.update(x_i, y_i)
-        for feature in storage.get_data()[0]:
-            reservoir_values.append(feature['t'])
-    print(Counter(reservoir_values))
+    storage = UniformReservoirStorage(store_targets=store_targets,
+                                      size=size)
+    for x_i, y_i in dummy_stream:
+        storage.update(x_i, y_i)
     assert len(storage) == size
     if store_targets:
         assert len(storage.get_data()[1]) == size
@@ -77,14 +74,10 @@ def test_uniform_reservoir_storage(dummy_stream, store_targets, size):
 @pytest.mark.parametrize("store_targets", [True, False])
 @pytest.mark.parametrize("size", [3, 5])
 def test_geometric_reservoir_storage(dummy_stream, store_targets, size):
-    storage = GeometricReservoirStorage(store_targets=store_targets, size=size)
-    reservoir_values = []
-    for _ in range(1000):
-        for x_i, y_i in dummy_stream:
-            storage.update(x_i, y_i)
-        for feature in storage.get_data()[0]:
-            reservoir_values.append(feature['t'])
-    print(Counter(reservoir_values))
+    storage = GeometricReservoirStorage(store_targets=store_targets,
+                                        size=size)
+    for x_i, y_i in dummy_stream:
+        storage.update(x_i, y_i)
     assert len(storage) == size
     if store_targets:
         assert len(storage.get_data()[1]) == size
