@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABC
+from typing import Callable
 
 
 class BaseImputer(ABC):
@@ -11,9 +12,9 @@ class BaseImputer(ABC):
     @abstractmethod
     def __init__(
             self,
-            model
+            model_function: Callable
     ):
-        self.model = model
+        self.model_function = model_function
 
     @abstractmethod
     def impute(self, feature_subset, x_i, n_samples=None):
