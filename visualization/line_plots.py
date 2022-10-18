@@ -4,8 +4,8 @@ from typing import Optional, Union, Sequence
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
-from visualization.color import color_list_generator, get_color_with_generator, STD_ALPHA, BACKGROUND_COLOR, BASE_COLOR
+from visualization.color import color_list_generator, get_color_with_generator, BACKGROUND_COLOR, BASE_COLOR, STD_ALPHA
+from visualization.config import SAVE_DPI
 
 
 def _validate_y_x_data(y_data: Union[dict, Sequence],
@@ -62,30 +62,33 @@ def _validate_std(std: Optional[dict],
     return std
 
 
-def plot_multi_line_graph(axis: plt.axis,
-                          y_data: Union[dict, Sequence],
-                          show: bool = False,
-                          x_data: Optional[Union[dict, Sequence]] = None,
-                          line_names: Optional[Union[dict, Sequence]] = None,
-                          names_to_highlight: Optional[list[str]] = None,
-                          line_styles: Optional[dict[str, str]] = None,
-                          std: Optional[Union[dict, Sequence]] = None,
-                          title: Optional[str] = None,
-                          y_label: Optional[str] = None,
-                          x_label: Optional[str] = None,
-                          y_ticks: Optional[list[Union[int, float]]] = None,
-                          x_ticks: Optional[list[Union[int, float]]] = None,
-                          y_min: Optional[Union[int, float]] = None,
-                          y_max: Optional[Union[int, float]] = None,
-                          x_min: Optional[Union[int, float]] = None,
-                          x_max: Optional[Union[int, float]] = None,
-                          legend_style: Optional[dict] = None,
-                          legend: Optional[dict[str, dict]] = None,
-                          base_color: Optional[str] = None,
-                          color_list: Optional[list[str]] = None,
-                          h_lines: Optional[list[dict]] = None,
-                          v_lines: Optional[list[dict]] = None
-                          ) -> Optional[plt.axis]:
+def plot_multi_line_graph(
+        axis: plt.axis,
+        y_data: Union[dict, Sequence],
+        *,
+        x_data: Optional[Union[dict, Sequence]] = None,
+        line_names: Optional[Union[dict, Sequence]] = None,
+        names_to_highlight: Optional[list[str]] = None,
+        line_styles: Optional[dict[str, str]] = None,
+        std: Optional[Union[dict, Sequence]] = None,
+        title: Optional[str] = None,
+        y_label: Optional[str] = None,
+        x_label: Optional[str] = None,
+        y_ticks: Optional[list[Union[int, float]]] = None,
+        x_ticks: Optional[list[Union[int, float]]] = None,
+        y_min: Optional[Union[int, float]] = None,
+        y_max: Optional[Union[int, float]] = None,
+        x_min: Optional[Union[int, float]] = None,
+        x_max: Optional[Union[int, float]] = None,
+        legend_style: Optional[dict] = None,
+        legend: Optional[dict[str, dict]] = None,
+        base_color: Optional[str] = None,
+        color_list: Optional[list[str]] = None,
+        h_lines: Optional[list[dict]] = None,
+        v_lines: Optional[list[dict]] = None,
+        markevery: Optional[dict[str, int]] = None
+) -> plt.axis:
+
     if names_to_highlight is None:
         names_to_highlight = line_names if line_names is not None else []
 
@@ -101,6 +104,9 @@ def plot_multi_line_graph(axis: plt.axis,
     if line_styles is None:
         line_styles = {facet: '-' for facet in y_data.keys()}
 
+    if markevery is None:
+        markevery = {facet: 1 for facet in y_data.keys()}
+
     line_colors = {}
 
     for facet, y_facet in y_data.items():
@@ -112,20 +118,20 @@ def plot_multi_line_graph(axis: plt.axis,
         for line_name in line_names:
             color_line = get_color_with_generator(color_generator=color_gens[facet],
                                                   base_color=base_color,
-                                                  item=line_name,
-                                                  item_selection=names_to_highlight)
+                                                  item_id=line_name,
+                                                  color_item_ids=names_to_highlight)
             line_colors[line_name] = color_line
             alpha = 1. if line_name in names_to_highlight else 0.6
-            axis.plot(x_facet,
-                      y_facet[line_name],
+            axis.plot(x_facet[::markevery[facet]],
+                      y_facet[line_name][::markevery[facet]],
                       ls=line_styles[facet],
                       c=color_line,
                       alpha=alpha,
                       linewidth=1)
             if std_facet is not None:
-                axis.fill_between(x_facet,
-                                  y_facet[line_name] - std_facet[line_name],
-                                  y_facet[line_name] + std_facet[line_name],
+                axis.fill_between(x_facet[::, markevery[facet]],
+                                  y_facet[line_name][::markevery[facet]] - std_facet[line_name][::markevery[facet]],
+                                  y_facet[line_name][::markevery[facet]] + std_facet[line_name][::markevery[facet]],
                                   color=color_line,
                                   alpha=STD_ALPHA,
                                   linewidth=0.)
@@ -189,10 +195,6 @@ def plot_multi_line_graph(axis: plt.axis,
 
     axis.set_facecolor(BACKGROUND_COLOR)
 
-    if show:
-        plt.show()
-        return None
-
     return axis
 
 
@@ -201,15 +203,16 @@ def plot_multi_line_graph(axis: plt.axis,
 ########################################################################################################################
 
 
-def stacked_plots(axes_function: Union[callable, list[callable]],
-                  data: list[list[dict]],  # TODO think about indexing
-                  ncols: int = 1,
-                  nrows: int = 1,
-                  height_ratios: Optional[list[float]] = None,
-                  width_ratios: Optional[list[float]] = None,
-                  figsize=(10, 5),
-                  title: Optional[str] = None,
-                  show: bool = False):
+def stacked_plots(
+        axes_function: Union[callable, list[callable]],
+        data: dict[int, dict[int, dict]],  # TODO think about indexing
+        ncols: int = 1,
+        nrows: int = 1,
+        height_ratios: Optional[list[float]] = None,
+        width_ratios: Optional[list[float]] = None,
+        figsize=(10, 5),
+        title: Optional[str] = None
+) -> tuple[plt.figure, list[plt.axis]]:
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, sharex='col', sharey='row',
                              figsize=figsize,
                              gridspec_kw={'height_ratios': height_ratios,
@@ -222,8 +225,5 @@ def stacked_plots(axes_function: Union[callable, list[callable]],
 
     if title is not None:
         fig.suptitle(title)
-    if show:
-        plt.show()
-        return None
     else:
         return fig, axes
