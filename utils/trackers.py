@@ -77,7 +77,7 @@ class WelfordTracker(BaseTracker):
 
     @property
     def mean(self):
-        """Returns the mean the stream"""
+        """Returns the mean of the stream"""
         return self.tracked_value
 
 
