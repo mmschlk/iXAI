@@ -16,10 +16,12 @@ class RiverToPredictionFunction:
 
     def __init__(self,
                  river_model: Union[Regressor, Classifier],
-                 feature_names: list[str]
+                 feature_names: list[str],
+                 classification: bool = True
                  ) -> None:
         self.river_model = river_model
         self.feature_names = feature_names
+        self.classification = classification
 
     def predict(self, x: Sequence) -> np.ndarray:
         if isinstance(x, np.ndarray):
@@ -27,9 +29,23 @@ class RiverToPredictionFunction:
             for i, (x_i, _) in enumerate(stream.iter_array(x, feature_names=self.feature_names)):
                 if i > len(x):
                     break
-                y_pred[i] = self.river_model.predict_one(x_i)
+                if self.classification:
+                    y_pred[i] = self.river_model.predict_proba_one(x_i)[1]
+                else:
+                    y_pred[i] = self.river_model.predict_one(x_i)[1]
         elif isinstance(x, dict):
-            y_pred = np.asarray([self.river_model.predict_one(x)])
+            y_pred = np.empty(shape=1)
+            if self.classification:
+                y_pred[0] = self.river_model.predict_proba_one(x)[1]
+            else:
+                y_pred[0] = self.river_model.predict_one(x)
+        elif isinstance(x, list):
+            y_pred = np.empty(shape=len(x))
+            for i, x_i in enumerate(x):
+                if self.classification:
+                    y_pred[i] = self.river_model.predict_proba_one(x_i)[1]
+                else:
+                    y_pred[i] = self.river_model.predict_one(x_i)[1]
         else:
             # TODO implement for non-numpy x inputs also a fast prediction
             raise NotImplementedError("Currently only numpy arrays can be used for prediction.")
