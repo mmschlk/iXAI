@@ -25,10 +25,7 @@ class MarginalImputer(BaseImputer):
         predictions = []
         for _ in range(n_samples):
             sampled_values = self._sample(self.storage_object, feature_subset)
-            new_x_i = x_i.copy()
-            for key in feature_subset:
-                new_x_i[key] = sampled_values[key]
-            prediction = self.model_function(new_x_i)
+            prediction = self.model_function({**x_i, **sampled_values})
             predictions.append(prediction)
         return predictions
 

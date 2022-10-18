@@ -47,9 +47,7 @@ class IncrementalPFI(BaseIncrementalExplainer):
             original_loss = self._loss_function(y_true=y_i, y_prediction=original_prediction)
             for feature in self.feature_names:
                 feature_subset = [feature]
-                predictions = self.imputer.impute(
-                    feature_subset, x_i, n_samples
-                )
+                predictions = self.imputer.impute(feature_subset, x_i, n_samples)
                 losses = []
                 for prediction in predictions:
                     loss = self._loss_function(y_true=y_i, y_prediction=prediction)
