@@ -1,4 +1,4 @@
-from .base_storage import BaseStorage
+from .base import BaseStorage
 from collections import deque
 from typing import Dict, Optional, Any
 

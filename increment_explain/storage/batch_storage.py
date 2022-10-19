@@ -1,4 +1,4 @@
-from .base_storage import BaseStorage
+from .base import BaseStorage
 from typing import Dict, Any, Optional
 
 
