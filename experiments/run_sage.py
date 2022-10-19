@@ -1,9 +1,7 @@
 import time
 
 import matplotlib.pyplot as plt
-import river.compat
 from river.utils import Rolling
-from tqdm import tqdm
 
 from explainer.sage import IncrementalSAGE
 from data.synthetic import SyntheticDataset
@@ -12,14 +10,11 @@ import copy
 import numpy as np
 
 from river.ensemble import AdaptiveRandomForestRegressor, AdaptiveRandomForestClassifier
-from river.linear_model import Perceptron, LinearRegression
 from river import metrics
 from river.stream import iter_array
 
-import sage
-
-from utils.converters import RiverToPredictionFunction, PredictionFunctionToRiverInput
-from visualization.line_plots import plot_multi_line_graph
+from increment_explain.utils import RiverToPredictionFunction, PredictionFunctionToRiverInput
+from increment_explain.visualization import plot_multi_line_graph
 
 
 def _dataset_target_function_regression_1(x):

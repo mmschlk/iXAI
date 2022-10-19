@@ -4,8 +4,7 @@ from typing import Optional, Union, Sequence
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from visualization.color import color_list_generator, get_color_with_generator, BACKGROUND_COLOR, BASE_COLOR, STD_ALPHA
-from visualization.config import SAVE_DPI
+from increment_explain.visualization.color import color_list_generator, get_color_with_generator, BACKGROUND_COLOR, BASE_COLOR, STD_ALPHA
 
 
 def _validate_y_x_data(y_data: Union[dict, Sequence],

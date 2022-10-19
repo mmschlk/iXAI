@@ -4,8 +4,8 @@ from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 
-from visualization.config import SAVE_DPI
-from visualization.line_plots import plot_multi_line_graph, stacked_plots
+from increment_explain.visualization.config import SAVE_DPI
+from increment_explain.visualization.line_plots import plot_multi_line_graph
 
 __all__ = [
     "FeatureImportancePlotter"

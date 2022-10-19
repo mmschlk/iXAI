@@ -1,20 +1,17 @@
-import time
 import numpy as np
 
 from river.ensemble import AdaptiveRandomForestClassifier
 from river import metrics
 from river.utils import Rolling
-from river.datasets.synth import Agrawal, ConceptDriftStream
+from river.datasets.synth import Agrawal
 
 from data.batch import AGRAWAL_FEATURE_NAMES
 from increment_explain.imputer import MarginalImputer
 from increment_explain.storage import UniformReservoirStorage
-from utils.converters import RiverToPredictionFunction
+from increment_explain.utils import RiverToPredictionFunction
 from increment_explain.explainer.pfi import IncrementalPFI
 
-from utils.trackers import ExponentialSmoothingTracker, WelfordTracker
-
-from visualization import FeatureImportancePlotter
+from increment_explain.visualization import FeatureImportancePlotter
 
 from sage.utils import CrossEntropyLoss
 
