@@ -1,4 +1,4 @@
-from .base_imputer import BaseImputer
+from .base import BaseImputer
 import random
 
 
@@ -14,11 +14,9 @@ class MarginalImputer(BaseImputer):
     def _sample(self, storage_object, feature_subset):
         features, _ = storage_object.get_data()
         if self.sampling_strategy == 'joint':
-            sampled_features = self._sample_marginals(features,
-                                                      feature_subset)
+            sampled_features = self._sample_marginals(features, feature_subset)
         else:
-            sampled_features = self._sample_product_marginals(features,
-                                                              feature_subset)
+            sampled_features = self._sample_product_marginals(features, feature_subset)
         return sampled_features
 
     def impute(self, feature_subset, x_i, n_samples=1):
