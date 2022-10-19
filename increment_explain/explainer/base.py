@@ -14,12 +14,28 @@ class BaseIncrementalExplainer(metaclass=ABCMeta):
     def __init__(
             self,
             model_function,
+            feature_names
+    ):
+        self.model_function = model_function
+        self.feature_names = feature_names
+        self.number_of_features = len(feature_names)
+        self.seen_samples = 0
+
+    def __repr__(self):
+        return f"Explainer for {self.number_of_features} features after {self.seen_samples} samples."
+
+
+class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
+
+    @abstractmethod
+    def __init__(
+            self,
+            model_function,
             feature_names,
             dynamic_setting: bool = False,
             smoothing_alpha: float = 0.001
     ):
-        self.model_function = model_function
-        self.feature_names = feature_names
+        super().__init__(model_function, feature_names)
         self.number_of_features = len(feature_names)
         self.seen_samples = 0
         self._smoothing_alpha = smoothing_alpha
@@ -35,6 +51,13 @@ class BaseIncrementalExplainer(metaclass=ABCMeta):
             self.importance_trackers = {
                 feature_name: WelfordTracker() for feature_name in feature_names
             }
+
+    @property
+    def importance_values(self):
+        return {
+            feature_name: float(self.importance_trackers[feature_name].tracked_value)
+            for feature_name in self.feature_names
+        }
 
     @abstractmethod
     def explain_one(self, x, y):

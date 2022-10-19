@@ -6,7 +6,7 @@ from increment_explain.storage import UniformReservoirStorage
 # from increment_explain.imputer import DefaultImputer
 from increment_explain.imputer import MarginalImputer
 # from imputer.default_imputer import DefaultImputer
-from increment_explain.explainer.incremental_pfi import IncrementalPFI
+from increment_explain.explainer.pfi import IncrementalPFI
 # from utils.converters import RiverToPredictionFunction
 
 

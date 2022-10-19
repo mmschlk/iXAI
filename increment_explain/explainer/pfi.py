@@ -1,16 +1,13 @@
 from typing import Callable, Optional
-from .base_incremental_explainer import BaseIncrementalExplainer
+from .base import BaseIncrementalFeatureImportance
 import numpy as np
-from utils.trackers import ExponentialSmoothingTracker
-from utils.loss_functions import mse_loss, mae_loss
-# from imputer.default_imputer import DefaultImputer
 
 __all__ = [
     "IncrementalPFI",
 ]
 
 
-class IncrementalPFI(BaseIncrementalExplainer):
+class IncrementalPFI(BaseIncrementalFeatureImportance):
 
     def __init__(
             self,
@@ -58,13 +55,7 @@ class IncrementalPFI(BaseIncrementalExplainer):
                 self._update_pfi(pfi, feature)
         self.storage.update(x_i, y_i)
         self.seen_samples += 1
-        return self.pfi_values
+        return self.importance_values
 
     def _update_pfi(self, value, feature):
         self.importance_trackers[feature].update(value)
-
-    @property
-    def pfi_values(self):
-        return {feature_name:
-                float(self.importance_trackers[feature_name].tracked_value)
-                for feature_name in self.feature_names}

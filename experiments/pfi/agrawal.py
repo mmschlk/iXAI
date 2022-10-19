@@ -10,7 +10,7 @@ from data.batch import AGRAWAL_FEATURE_NAMES
 from increment_explain.imputer import MarginalImputer
 from increment_explain.storage import UniformReservoirStorage
 from utils.converters import RiverToPredictionFunction
-from increment_explain.explainer.incremental_pfi import IncrementalPFI
+from increment_explain.explainer.pfi import IncrementalPFI
 
 from utils.trackers import ExponentialSmoothingTracker, WelfordTracker
 
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             model.learn_one(x_i, y_i)
             if n % 1000 == 0:
                 print(f"{n}: performance {metric.get()}\n"
-                      f"{n}: {EXPLAINER_NAME} {incremental_explainer.pfi_values}")
+                      f"{n}: {EXPLAINER_NAME} {incremental_explainer.importance_values}")
             if n >= N_STREAM_1:
                 break
 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
             model.learn_one(x_i, y_i)
             if n % 1000 == 0:
                 print(f"{n}: performance {metric.get()}\n"
-                      f"{n}: {EXPLAINER_NAME} {incremental_explainer.pfi_values}")
+                      f"{n}: {EXPLAINER_NAME} {incremental_explainer.importance_values}")
             if n >= N_STREAM_2:
                 break
 
