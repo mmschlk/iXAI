@@ -1,8 +1,6 @@
 from random import random
 from typing import Optional, Generator
-
 import numpy as np
-from river.datasets import Elec2
 from river.datasets.base import Dataset
 
 
@@ -12,65 +10,6 @@ __all__ = [
     "FeatureSwitchStream",
     "ConceptDriftStream",
 ]
-
-# ELEC 2 data
-ELEC2_FEATURE_NAMES = np.asarray(
-    [
-        'date',
-        'day',
-        'period',
-        'nswprice',
-        'nswdemand',
-        'vicprice',
-        'vicdemand',
-        'transfer'
-    ]
-)
-
-ELEC2_CATEGORICAL_FEATURE_NAMES = np.asarray([])
-
-ELEC2_LENGTH = 45312
-
-
-# stagger data stream
-STAGGER_FEATURE_NAMES = np.array(
-    [
-        'size',
-        'color',
-        'shape'
-    ]
-)
-STAGGER_CATEGORICAL_FEATURE_NAMES = np.array(
-    [
-        'size',
-        'color',
-        'shape'
-    ]
-)
-STAGGER_LENGTH = 10000
-
-# agrawal data stream
-AGRAWAL_FEATURE_NAMES = np.array(
-    [
-        'salary',
-        'commission',
-        'age',
-        'elevel',
-        'car',
-        'zipcode',
-        'hvalue',
-        'hyears',
-        'loan'
-    ]
-)
-AGRAWAL_CATEGORICAL_FEATURE_NAMES = np.array(
-    [
-        'elevel',
-        'car',
-        'zipcode'
-    ]
-)
-AGRAWAL_LENGTH = 20000
 
 
 class BatchStream(Dataset):
@@ -217,8 +156,4 @@ def get_concept_drift_stream(
 
 
 if __name__ == "__main__":
-    stream = Elec2()
-    stream = get_concept_drift_stream(stream=stream, feature_remapping={'nswprice': 'vicprice'}, position=20000, sudden_drift=False, width=1000)
-    for n, (x_i, y_i) in enumerate(stream):
-        if n % 1000 == 0:
-            print(n, x_i, y_i)
+    pass

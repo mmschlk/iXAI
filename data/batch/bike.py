@@ -11,7 +11,7 @@ class BikeSharing(BaseBatchDataset):
     def __init__(
             self,
             random_seed=None,
-            shuffle_dataset=True
+            shuffle_dataset=False
     ):
         dataset, class_label = get_open_ml_dataset(42713, version=1)
         self.num_feature_names = ['hour', 'temp', 'feel_temp', 'humidity', 'windspeed']
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     print(f"n_samples:     {test_dataset.n_samples}")
     print(f"n_features:    {test_dataset.n_features}")
     print(f"feature_names: {test_dataset.feature_names}")
-    stream = test_dataset.to_stream()
+    stream = test_dataset.stream
     for i, sample in enumerate(stream):
         print(i, sample)
         if i > 3:

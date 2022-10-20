@@ -7,7 +7,7 @@ from river.datasets import base
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 
-from data.stream import BatchStream, SuddenDriftStream, ConceptDriftStream
+from data.stream._base import BatchStream, SuddenDriftStream, ConceptDriftStream
 
 
 __all__ = [
@@ -59,7 +59,8 @@ class BaseBatchDataset(metaclass=ABCMeta):
             self.task = base.REG
         self.n_outputs = 1
 
-    def to_stream(self):
+    @property
+    def stream(self):
         return BatchStream(
             stream=iter_pandas(X=self.x_data, y=self.y_data),
             task=self.task, n_features=self.n_features, n_outputs=self.n_outputs

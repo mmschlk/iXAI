@@ -13,7 +13,7 @@ class Adult(BaseBatchDataset):
             self,
             version=2,
             random_seed=None,
-            shuffle_dataset=True
+            shuffle_dataset=False
     ):
         assert version in [1, 2], "OpenML census dataset version must be '1' or '2'."
         dataset, class_label = get_open_ml_dataset("adult", version=version)
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     print(f"n_samples:     {test_dataset.n_samples}")
     print(f"n_features:    {test_dataset.n_features}")
     print(f"feature_names: {test_dataset.feature_names}")
-    stream = test_dataset.to_stream()
+    stream = test_dataset.stream
     for i, sample in enumerate(stream):
         print(i, sample)
         if i > 3:
