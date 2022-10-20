@@ -6,7 +6,6 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from increment_explain.explainer import BaseIncrementalExplainer
-from increment_explain.storage import UniformReservoirStorage
 from increment_explain.storage.base import BaseStorage
 
 
