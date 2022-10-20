@@ -32,6 +32,47 @@ ELEC2_CATEGORICAL_FEATURE_NAMES = np.asarray([])
 ELEC2_LENGTH = 45312
 
 
+# stagger data stream
+STAGGER_FEATURE_NAMES = np.array(
+    [
+        'size',
+        'color',
+        'shape'
+    ]
+)
+STAGGER_CATEGORICAL_FEATURE_NAMES = np.array(
+    [
+        'size',
+        'color',
+        'shape'
+    ]
+)
+STAGGER_LENGTH = 10000
+
+# agrawal data stream
+AGRAWAL_FEATURE_NAMES = np.array(
+    [
+        'salary',
+        'commission',
+        'age',
+        'elevel',
+        'car',
+        'zipcode',
+        'hvalue',
+        'hyears',
+        'loan'
+    ]
+)
+AGRAWAL_CATEGORICAL_FEATURE_NAMES = np.array(
+    [
+        'elevel',
+        'car',
+        'zipcode'
+    ]
+)
+AGRAWAL_LENGTH = 20000
+
+
 class BatchStream(Dataset):
 
     def __init__(self, stream, task, n_features, n_classes=None, n_outputs=None):

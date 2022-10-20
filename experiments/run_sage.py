@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from river.utils import Rolling
 
 from explainer.sage import IncrementalSAGE
-from data.synthetic import SyntheticDataset
+from data.synth.synthetic import SyntheticDataset
 
 import copy
 import numpy as np

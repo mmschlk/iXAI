@@ -1,4 +1,4 @@
-from data.synthetic import SyntheticDataset
+from data.synth.synthetic import SyntheticDataset
 import numpy as np
 from river.ensemble import AdaptiveRandomForestRegressor
 from river import metrics

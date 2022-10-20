@@ -16,7 +16,7 @@ import itertools
 import numpy as np
 from scipy.special import binom
 
-from increment_explain.utils import get_n_feature_masks, get_all_feature_masks
+from increment_explain.utils.permutations import get_n_feature_masks, get_all_feature_masks
 
 __all__ = [
     "KernelSHAP",
