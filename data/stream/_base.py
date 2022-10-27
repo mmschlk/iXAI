@@ -1,5 +1,5 @@
 from random import random
-from typing import Optional, Generator
+from typing import Optional, Generator, Union, Dict
 import numpy as np
 from river.datasets.base import Dataset
 
@@ -9,6 +9,7 @@ __all__ = [
     "SuddenDriftStream",
     "FeatureSwitchStream",
     "ConceptDriftStream",
+    "StreamDataset"
 ]
 
 
@@ -107,6 +108,25 @@ class FeatureSwitchStream(Dataset):
             yield x, y
 
 
+class StreamDataset(Dataset):
+
+    def __init__(self, stream, n_samples, task, n_features, n_outputs, feature_names, cat_feature_names, num_feature_names):
+        super().__init__(task, n_features)
+        self.stream = stream
+        self.n_outputs = n_outputs
+        self.feature_names = feature_names
+        self.cat_feature_names = cat_feature_names
+        self.num_feature_names = num_feature_names
+        self.n_samples = n_samples
+
+    def __iter__(self):
+        n = 0
+        stream_iter = iter(self.stream)
+        while n < self.n_samples:
+            yield next(stream_iter)
+            n += 1
+
+
 def slice_stream(stream: Generator, position: int):
     # TODO make generator-safe (synth is generator)
     first_stream = []
@@ -125,11 +145,20 @@ def slice_stream(stream: Generator, position: int):
     return first_stream, second_stream
 
 
+def _get_feature_remapping_dict(feature_remapping_str: str):
+    feature_remapping = {}
+    for features in feature_remapping_str.split(' '):
+        feature_1, feature_2 = features.split('_')
+        feature_remapping[feature_1] = feature_2
+        feature_remapping[feature_2] = feature_1
+    return feature_remapping
+
+
 def get_concept_drift_stream(
         stream,
         position: int,
         drift_stream: Optional[Generator] = None,
-        feature_remapping: Optional[dict[str, str]] = None,
+        feature_remapping: Optional[Union[Dict[str, str], str]] = None,
         width: Optional[int] = None,
         sudden_drift: bool = False
 ):
@@ -140,6 +169,8 @@ def get_concept_drift_stream(
         stream, drift_stream = slice_stream(stream=stream, position=position)
 
     if feature_remapping is not None:
+        if type(feature_remapping) == str:
+            feature_remapping = _get_feature_remapping_dict(feature_remapping)
         drift_stream = FeatureSwitchStream(
             feature_switch=feature_remapping, stream=drift_stream,
             task=drift_stream.task, n_features=drift_stream.n_features,

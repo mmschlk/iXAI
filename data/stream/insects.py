@@ -1,19 +1,22 @@
+from typing import Optional
 from river.datasets import Insects as RiverDataset
+from data.stream._base import StreamDataset
 
 
-class Insects:
+class Insects(StreamDataset):
 
     def __init__(
             self,
-            variant="abrupt_balanced"
+            variant="abrupt_balanced",
+            n_samples: Optional[int] = None
     ):
-        self.stream = RiverDataset()
-        self.feature_names = ['Att1', 'Att2', 'Att3', 'Att4', 'Att5', 'Att6', 'Att7', 'Att8', 'Att9', 'Att10', 'Att11',
+        stream = RiverDataset()
+        feature_names = ['Att1', 'Att2', 'Att3', 'Att4', 'Att5', 'Att6', 'Att7', 'Att8', 'Att9', 'Att10', 'Att11',
                               'Att12', 'Att13', 'Att14', 'Att15', 'Att16', 'Att17', 'Att18', 'Att19', 'Att20', 'Att21',
                               'Att22', 'Att23', 'Att24', 'Att25', 'Att26', 'Att27', 'Att28', 'Att29', 'Att30', 'Att31',
                               'Att32', 'Att33']
-        self.cat_feature_names = []
-        self.num_feature_names = ['Att1', 'Att2', 'Att3', 'Att4', 'Att5', 'Att6', 'Att7', 'Att8', 'Att9', 'Att10',
+        cat_feature_names = []
+        num_feature_names = ['Att1', 'Att2', 'Att3', 'Att4', 'Att5', 'Att6', 'Att7', 'Att8', 'Att9', 'Att10',
                                   'Att11', 'Att12', 'Att13', 'Att14', 'Att15', 'Att16', 'Att17', 'Att18', 'Att19',
                                   'Att20', 'Att21', 'Att22', 'Att23', 'Att24', 'Att25', 'Att26', 'Att27', 'Att28',
                                   'Att29', 'Att30', 'Att31', 'Att32', 'Att33']
@@ -30,7 +33,20 @@ class Insects:
             "incremental_imbalanced": (452_044, 140_004_218),
             "out-of-control": (905_145, 277_777_854),
         }
-        self.n_samples = variant_sizes[variant][0]
+        n_samples_variant = variant_sizes[variant][0]
+        if n_samples is not None and n_samples > n_samples_variant:
+            raise ValueError(f"The dataset with variant {variant} contains less samples, {n_samples_variant} "
+                             f"than expected which was {n_samples}. Select less samples.")
+        super().__init__(
+            stream=stream,
+            n_samples=n_samples,
+            feature_names=feature_names,
+            cat_feature_names=cat_feature_names,
+            num_feature_names=num_feature_names,
+            task=stream.task,
+            n_features=len(feature_names),
+            n_outputs=stream.n_outputs,
+        )
 
 
 if __name__ == "__main__":

@@ -1,17 +1,17 @@
-from river.datasets import Elec2 as RiverDataset
+from river.datasets import Bikes as RiverDataset
 from data.stream._base import StreamDataset
 
 
-class Elec2(StreamDataset):
+class Bike(StreamDataset):
 
     def __init__(
             self,
-            n_samples: int = 45312
+            n_samples: int = 182470
     ):
         stream = RiverDataset()
-        feature_names = ['date', 'day', 'period', 'nswprice', 'nswdemand', 'vicprice', 'vicdemand', 'transfer']
-        cat_feature_names = []
-        num_feature_names = feature_names
+        feature_names = ['moment', 'station', 'clouds', 'description', 'humidity', 'pressure', 'temperature', 'wind']
+        cat_feature_names = ['station', 'description']
+        num_feature_names = ['clouds', 'humidity', 'pressure', 'temperature', 'wind']
         super().__init__(
             stream=stream,
             n_samples=n_samples,
@@ -25,7 +25,7 @@ class Elec2(StreamDataset):
 
 
 if __name__ == "__main__":
-    dataset = Elec2()
+    dataset = Bike()
     stream = dataset.stream
     print(stream.n_samples)
     for n, (x_i, y_i) in enumerate(stream):

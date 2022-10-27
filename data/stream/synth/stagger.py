@@ -1,17 +1,21 @@
-from river.datasets import Elec2 as RiverDataset
+from typing import Optional
+from river.datasets.synth import STAGGER as RiverDataset
+
 from data.stream._base import StreamDataset
 
 
-class Elec2(StreamDataset):
+class Stagger(StreamDataset):
 
     def __init__(
             self,
-            n_samples: int = 45312
+            classification_function,
+            random_seed: Optional[int] = None,
+            n_samples: int = 10000
     ):
-        stream = RiverDataset()
-        feature_names = ['date', 'day', 'period', 'nswprice', 'nswdemand', 'vicprice', 'vicdemand', 'transfer']
-        cat_feature_names = []
-        num_feature_names = feature_names
+        stream = RiverDataset(classification_function=classification_function, seed=random_seed)
+        feature_names = ['size', 'color', 'shape']
+        cat_feature_names = ['size', 'color', 'shape']
+        num_feature_names = []
         super().__init__(
             stream=stream,
             n_samples=n_samples,
@@ -25,7 +29,7 @@ class Elec2(StreamDataset):
 
 
 if __name__ == "__main__":
-    dataset = Elec2()
+    dataset = Stagger(classification_function=1, random_seed=42)
     stream = dataset.stream
     print(stream.n_samples)
     for n, (x_i, y_i) in enumerate(stream):

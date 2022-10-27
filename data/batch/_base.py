@@ -40,11 +40,14 @@ class BaseBatchDataset(metaclass=ABCMeta):
             random_seed: Optional[int] = None,
             drop_na: bool = True,
             shuffle_dataset: bool = True,
+            n_samples: Optional[int] = None
     ):
         if drop_na:
             dataset.dropna(inplace=True)
         if shuffle_dataset:
             dataset = shuffle(dataset, random_state=random_seed)
+        if n_samples is not None:
+            dataset = dataset[0:n_samples+1]
         self.x_data = dataset
         self.y_data = dataset.pop(class_label)
         self.feature_names = list(self.x_data.columns)
@@ -60,9 +63,14 @@ class BaseBatchDataset(metaclass=ABCMeta):
         self.n_outputs = 1
 
     @property
-    def stream(self):
+    def stream(self, start_pos: int = 0, end_pos: Optional[int] = None):
+        end_pos = self.n_samples + 1 if end_pos is None else end_pos
+        start_pos = start_pos * self.n_samples if type(start_pos) == float else start_pos
+        end_pos = end_pos * self.n_samples if type(end_pos) == float else end_pos
+        if (end_pos - start_pos - 1) != self.n_samples:
+            self.n_samples = end_pos - start_pos - 1
         return BatchStream(
-            stream=iter_pandas(X=self.x_data, y=self.y_data),
+            stream=iter_pandas(X=self.x_data[start_pos:end_pos], y=self.y_data[start_pos:end_pos]),
             task=self.task, n_features=self.n_features, n_outputs=self.n_outputs
         )
 

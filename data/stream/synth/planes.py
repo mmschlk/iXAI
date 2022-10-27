@@ -1,17 +1,19 @@
-from river.datasets import Elec2 as RiverDataset
+from typing import Optional
+from river.datasets.synth import Planes2D as RiverDataset
+
 from data.stream._base import StreamDataset
 
-
-class Elec2(StreamDataset):
+class Planes2D(StreamDataset):
 
     def __init__(
             self,
-            n_samples: int = 45312
+            random_seed: Optional[int] = None,
+            n_samples: int = 20000
     ):
-        stream = RiverDataset()
-        feature_names = ['date', 'day', 'period', 'nswprice', 'nswdemand', 'vicprice', 'vicdemand', 'transfer']
+        stream = RiverDataset(seed=random_seed)
+        feature_names = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         cat_feature_names = []
-        num_feature_names = feature_names
+        num_feature_names = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         super().__init__(
             stream=stream,
             n_samples=n_samples,
@@ -25,7 +27,7 @@ class Elec2(StreamDataset):
 
 
 if __name__ == "__main__":
-    dataset = Elec2()
+    dataset = Planes2D(random_seed=42)
     stream = dataset.stream
     print(stream.n_samples)
     for n, (x_i, y_i) in enumerate(stream):

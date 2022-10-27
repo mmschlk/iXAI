@@ -32,7 +32,8 @@ class BankMarketing(BaseBatchDataset):
     def __init__(
             self,
             random_seed=None,
-            shuffle_dataset=False
+            shuffle_dataset=False,
+            n_samples=None
     ):
         dataset, class_label = get_open_ml_dataset("bank-marketing", version=1)
         dataset = dataset.rename(columns=OPEN_ML_BANK_MARKETING_RENAME_MAPPER)
@@ -60,6 +61,7 @@ class BankMarketing(BaseBatchDataset):
             classification=True,
             random_seed=random_seed,
             shuffle_dataset=shuffle_dataset,
+            n_samples=n_samples
         )
 
 

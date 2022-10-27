@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 
 from numpy import ndarray
 import river
@@ -34,7 +34,7 @@ class BaseSyntheticDataset(metaclass=ABCMeta):
             *,
             x_data: ndarray,
             y_data: ndarray,
-            feature_names: list[str]
+            feature_names: List[str]
     ):
         self.x_data = x_data
         self.y_data = y_data

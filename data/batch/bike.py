@@ -11,7 +11,8 @@ class BikeSharing(BaseBatchDataset):
     def __init__(
             self,
             random_seed=None,
-            shuffle_dataset=False
+            shuffle_dataset=False,
+            n_samples=None
     ):
         dataset, class_label = get_open_ml_dataset(42713, version=1)
         self.num_feature_names = ['hour', 'temp', 'feel_temp', 'humidity', 'windspeed']
@@ -37,6 +38,7 @@ class BikeSharing(BaseBatchDataset):
             classification=False,
             random_seed=random_seed,
             shuffle_dataset=shuffle_dataset,
+            n_samples=n_samples
         )
 
 

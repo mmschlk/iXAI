@@ -13,7 +13,8 @@ class Adult(BaseBatchDataset):
             self,
             version=2,
             random_seed=None,
-            shuffle_dataset=False
+            shuffle_dataset=False,
+            n_samples=None
     ):
         assert version in [1, 2], "OpenML census dataset version must be '1' or '2'."
         dataset, class_label = get_open_ml_dataset("adult", version=version)
@@ -41,6 +42,7 @@ class Adult(BaseBatchDataset):
             classification=True,
             random_seed=random_seed,
             shuffle_dataset=shuffle_dataset,
+            n_samples=n_samples
         )
 
 
