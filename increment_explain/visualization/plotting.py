@@ -66,6 +66,7 @@ class FeatureImportancePlotter(BasePlotter):
             self,
             figsize: Optional[tuple[int, int]] = None,
             model_performance: Optional[dict[str, list]] = None,
+            performance_ylim=(0., 1.),
             **line_kw
     ) -> None:
 
@@ -92,8 +93,8 @@ class FeatureImportancePlotter(BasePlotter):
             performance_axis = plot_multi_line_graph(
                 axis=performance_axis,
                 y_data=model_performance,
-                y_min=0.,
-                y_max=1.,
+                y_min=performance_ylim[0],
+                y_max=performance_ylim[1],
                 line_names=list(model_performance.keys()),
                 names_to_highlight=list(model_performance.keys()),
                 color_list=['red'],
