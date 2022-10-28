@@ -18,7 +18,7 @@ class Agrawal(StreamDataset):
         feature_names = ['salary', 'commission', 'age', 'elevel', 'car', 'zipcode', 'hvalue', 'hyears', 'loan']
         cat_feature_names = ['job', 'marital', 'education', 'default', 'housing', 'loan', 'contact', 'day',
                                   'month', 'campaign', 'poutcome']
-        num_feature_names = ['elevel', 'car', 'zipcode']
+        num_feature_names = ['elevel', 'car', 'zipcode'] # TODO check
         super().__init__(
             stream=stream,
             n_samples=n_samples,
