@@ -16,9 +16,8 @@ class Agrawal(StreamDataset):
             n_samples = 20000
         stream = RiverDataset(classification_function=classification_function, seed=random_seed)
         feature_names = ['salary', 'commission', 'age', 'elevel', 'car', 'zipcode', 'hvalue', 'hyears', 'loan']
-        cat_feature_names = ['job', 'marital', 'education', 'default', 'housing', 'loan', 'contact', 'day',
-                                  'month', 'campaign', 'poutcome']
-        num_feature_names = ['elevel', 'car', 'zipcode'] # TODO check
+        cat_feature_names = ['salary', 'commission', 'age', 'hvalue', 'hyears', 'loan']
+        num_feature_names = ['elevel', 'car', 'zipcode']
         super().__init__(
             stream=stream,
             n_samples=n_samples,

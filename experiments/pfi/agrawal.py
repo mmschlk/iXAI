@@ -3,14 +3,13 @@ import numpy as np
 from river.ensemble import AdaptiveRandomForestClassifier
 from river import metrics
 from river.utils import Rolling
-#from river.datasets.synth import Agrawal
+
 from data.stream.synth import Agrawal
-#from data.batch.str import AGRAWAL_FEATURE_NAMES
+
 from increment_explain.imputer import MarginalImputer
 from increment_explain.storage import UniformReservoirStorage
 from increment_explain.utils.converters import RiverToPredictionFunction
 from increment_explain.explainer.pfi import IncrementalPFI
-
 from increment_explain.visualization import FeatureImportancePlotter
 
 from sage.utils import CrossEntropyLoss
@@ -41,7 +40,6 @@ if __name__ == "__main__":
     for i in range(1):
 
         # Setup Data ---------------------------------------------------------------------------------------------------
-        # feature_names = list(AGRAWAL_FEATURE_NAMES)
         dataset_1 = Agrawal(classification_function=CLASSIFICATION_FUNCTIONS[0], random_seed=RANDOM_SEED, n_samples=N_STREAM_1)
         dataset_2 = Agrawal(classification_function=CLASSIFICATION_FUNCTIONS[1], random_seed=RANDOM_SEED, n_samples=N_STREAM_1)
         stream_1 = dataset_1.stream
