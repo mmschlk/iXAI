@@ -7,7 +7,7 @@ from river.datasets import base
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 
-from data.stream._base import BatchStream, SuddenDriftStream, ConceptDriftStream
+from data.stream._base import BatchStream, ConceptDriftStream
 
 
 __all__ = [
@@ -78,8 +78,7 @@ class BaseBatchDataset(metaclass=ABCMeta):
             self,
             feature_remapping: dict[str, str],
             position: Union[int, float] = 0.5,
-            width: Union[int, float] = 0.05,
-            sudden_drift: bool = False
+            width: Union[int, float] = 0.05
     ):
         feature_remapping.update({v: k for k, v in feature_remapping.items()})
         n_stream_1 = int(np.floor(position * self.n_samples)) if position < 1 else int(position)
@@ -96,13 +95,8 @@ class BaseBatchDataset(metaclass=ABCMeta):
             stream=iter_pandas(X=x_data_2, y=y_data_2),
             task=self.task, n_features=self.n_features, n_outputs=self.n_outputs
         )
-        if not sudden_drift:
-            concept_drift_stream = ConceptDriftStream(stream=stream_1, drift_stream=stream_2,
-                                                      width=width)
-        else:
-            concept_drift_stream = SuddenDriftStream(stream=stream_1, drift_stream=stream_2,
-                                                     task=self.task, n_features=self.n_features,
-                                                     n_outputs=self.n_outputs)
+
+        concept_drift_stream = ConceptDriftStream(stream=stream_1, drift_stream=stream_2, width=width)
         return concept_drift_stream
 
     def transform_features(self, feature_names, transformer):

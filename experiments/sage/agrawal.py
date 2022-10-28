@@ -4,7 +4,7 @@ from river.ensemble import AdaptiveRandomForestClassifier
 from river import metrics
 from river.utils import Rolling
 
-from data.stream import Agrawal
+from data.stream.synth import Agrawal
 from increment_explain.imputer import MarginalImputer
 from increment_explain.storage import GeometricReservoirStorage
 from increment_explain.utils.converters import RiverToPredictionFunction
@@ -26,9 +26,9 @@ def cross_entropy_loss(y_prediction, y_true):
 if __name__ == "__main__":
     CROSS_ENTROPY = CrossEntropyLoss(reduction='mean')
     RANDOM_SEED = 1
-    CLASSIFICATION_FUNCTIONS = (3, 5)
+    CLASSIFICATION_FUNCTIONS = (1, 2)
 
-    STREAM_LENGTH = 20000
+    STREAM_LENGTH = 10000
     STREAM_POSITION = int(STREAM_LENGTH * 0.5)
     N_STREAM_1 = STREAM_POSITION
     N_STREAM_2 = STREAM_LENGTH - N_STREAM_1
@@ -71,7 +71,7 @@ if __name__ == "__main__":
             feature_names=feature_names,
             storage=storage,
             imputer=imputer,
-            n_inner_samples=2,
+            n_inner_samples=1,
             loss_function=loss_function,
             smoothing_alpha=SMOOTHING_ALPHA,
             dynamic_setting=True

@@ -1,5 +1,7 @@
 import time
 
+from river.drift import ADWIN
+
 from experiments.setup.data import get_dataset, get_concept_drift_dataset
 from experiments.setup.explainer import get_incremental_sage_explainer, \
     get_batch_sage_explainer, get_interval_sage_explainer, get_incremental_pfi_explainer
@@ -12,14 +14,13 @@ DATASET_1_NAME = 'agrawal 1'
 DATASET_2_NAME = 'agrawal 2'
 DATASET_RANDOM_SEED = 1
 SHUFFLE_DATA = False
-N_SAMPLES_1 = 10000
-N_SAMPLES_2 = 10000
+N_SAMPLES_1 = 5000
+N_SAMPLES_2 = 5000
 N_SAMPLES = N_SAMPLES_1 + N_SAMPLES_2
 
 CONCEPT_DRIFT_POSITION = int(0.5 * N_SAMPLES)
-CONCEPT_DRIFT_WIDTH = int(0.05 * N_SAMPLES)
-CONCEPT_DRIFT_SWITCHING_FEATURES = 'salary_age'
-CONCEPT_DRIFT_SUDDEN = True
+CONCEPT_DRIFT_WIDTH = int(1)
+CONCEPT_DRIFT_SWITCHING_FEATURES = None #'salary_age'
 
 MODEL_NAME = 'ARF'
 
@@ -43,12 +44,11 @@ if __name__ == "__main__":
         dataset_1_name=DATASET_1_NAME, dataset_2_name=DATASET_2_NAME,
         dataset_1=dataset_1, dataset_2=dataset_2,
         position=CONCEPT_DRIFT_POSITION, width=CONCEPT_DRIFT_WIDTH,
-        features_to_switch=CONCEPT_DRIFT_SWITCHING_FEATURES, sudden_drift=CONCEPT_DRIFT_SUDDEN,
+        features_to_switch=CONCEPT_DRIFT_SWITCHING_FEATURES
     )
 
     feature_names = dataset.feature_names
     n_samples = dataset.n_samples
-    print(n_samples)
     stream = dataset.stream
 
     task = dataset.task
@@ -59,11 +59,14 @@ if __name__ == "__main__":
     model, model_function = get_model(
         model_name=MODEL_NAME, task=task, feature_names=feature_names, **MODEL_PARAMS[MODEL_NAME])
 
+    performance_drift_detector = ADWIN(delta=0.001)
+
+
     incremental_sage = get_incremental_sage_explainer(
         feature_names=feature_names,
         model_function=model_function,
         loss_function=loss_function,
-        n_inner_samples=N_INNER_SAMPLES
+        n_inner_samples=N_INNER_SAMPLES,
     )
 
     plotter = FeatureImportancePlotter(

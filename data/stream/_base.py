@@ -6,7 +6,6 @@ from river.datasets.base import Dataset
 
 __all__ = [
     "BatchStream",
-    "SuddenDriftStream",
     "FeatureSwitchStream",
     "ConceptDriftStream",
     "StreamDataset"
@@ -21,20 +20,6 @@ class BatchStream(Dataset):
 
     def __iter__(self):
         for x_i, y_i in self.stream_gen:
-            yield x_i, y_i
-
-
-class SuddenDriftStream(Dataset):
-
-    def __init__(self, stream, drift_stream, task, n_features, n_classes=None, n_outputs=None):
-        super().__init__(task, n_features, n_classes=n_classes, n_outputs=n_outputs)
-        self.stream = stream
-        self.drift_stream = drift_stream
-
-    def __iter__(self):
-        for x_i, y_i in self.stream:
-            yield x_i, y_i
-        for x_i, y_i in self.drift_stream:
             yield x_i, y_i
 
 
@@ -128,7 +113,6 @@ class StreamDataset(Dataset):
 
 
 def slice_stream(stream: Generator, position: int):
-    # TODO make generator-safe (synth is generator)
     first_stream = []
     second_stream = []
     for n, stream_i in enumerate(stream):
@@ -159,11 +143,8 @@ def get_concept_drift_stream(
         position: int,
         drift_stream: Optional[Generator] = None,
         feature_remapping: Optional[Union[Dict[str, str], str]] = None,
-        width: Optional[int] = None,
-        sudden_drift: bool = False
+        width: int = 1
 ):
-    if width is None and not sudden_drift:
-        raise ValueError(f"If 'sudden_drift' is false then 'width' must be provided as an int and not be {width}.")
 
     if drift_stream is None:
         stream, drift_stream = slice_stream(stream=stream, position=position)
@@ -176,13 +157,9 @@ def get_concept_drift_stream(
             task=drift_stream.task, n_features=drift_stream.n_features,
             n_classes=drift_stream.n_classes, n_outputs=drift_stream.n_outputs)
 
-    if not sudden_drift:
-        concept_drift_stream = ConceptDriftStream(
-            stream=stream, drift_stream=drift_stream, position=position, width=width)
-    else:
-        concept_drift_stream = SuddenDriftStream(
-            stream=stream, drift_stream=drift_stream,
-            task=stream.task, n_features=stream.n_features, n_outputs=stream.n_outputs, n_classes=stream.n_classes)
+    concept_drift_stream = ConceptDriftStream(
+        stream=stream, drift_stream=drift_stream, position=position, width=width)
+
     return concept_drift_stream
 
 
