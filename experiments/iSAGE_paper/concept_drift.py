@@ -2,21 +2,22 @@ import time
 
 from experiments.setup.data import get_dataset, get_concept_drift_dataset
 from experiments.setup.explainer import get_incremental_sage_explainer, \
-    get_batch_sage_explainer, get_interval_sage_explainer, get_incremental_pfi_explainer
+    get_interval_sage_explainer, get_incremental_pfi_explainer
 from experiments.setup.loss import get_loss_function, get_training_metric
 from experiments.setup.model import get_model
+
+DEBUG = True
 
 DATASET_1_NAME = 'agrawal 1'
 DATASET_2_NAME = 'agrawal 2'
 DATASET_RANDOM_SEED = 1
 SHUFFLE_DATA = False
-N_SAMPLES_1 = 100
-N_SAMPLES_2 = 100
+N_SAMPLES_1 = 10000
+N_SAMPLES_2 = 10000
 
-CONCEPT_DRIFT_POSITION = 0.05
-CONCEPT_DRIFT_WIDTH = 0.05
-CONCEPT_DRIFT_SWITCHING_FEATURES = 'salary_age'
-CONCEPT_DRIFT_SUDDEN = True
+CONCEPT_DRIFT_POSITION = 10000
+CONCEPT_DRIFT_WIDTH = 1
+CONCEPT_DRIFT_SWITCHING_FEATURES = {'salary': 'age'}
 
 MODEL_NAME = 'ARF'
 
@@ -33,29 +34,29 @@ MODEL_PARAMS = {
 
 if __name__ == "__main__":
 
-    dataset_1 = get_dataset(dataset_name=DATASET_1_NAME, random_seed=DATASET_RANDOM_SEED, shuffle=SHUFFLE_DATA, n_samples=N_SAMPLES_1)
-    dataset_2 = get_dataset(dataset_name=DATASET_2_NAME, random_seed=DATASET_RANDOM_SEED, shuffle=SHUFFLE_DATA, n_samples=N_SAMPLES_2)
-
+    # Get Data ---------------------------------------------------------------------------------------------------------
+    dataset_1 = get_dataset(
+        dataset_name=DATASET_1_NAME, random_seed=DATASET_RANDOM_SEED, shuffle=SHUFFLE_DATA, n_samples=N_SAMPLES_1)
+    dataset_2 = get_dataset(
+        dataset_name=DATASET_2_NAME, random_seed=DATASET_RANDOM_SEED, shuffle=SHUFFLE_DATA, n_samples=N_SAMPLES_2)
     dataset = get_concept_drift_dataset(
         dataset_1_name=DATASET_1_NAME, dataset_2_name=DATASET_2_NAME,
         dataset_1=dataset_1, dataset_2=dataset_2,
         position=CONCEPT_DRIFT_POSITION, width=CONCEPT_DRIFT_WIDTH,
-        features_to_switch=CONCEPT_DRIFT_SWITCHING_FEATURES, sudden_drift=CONCEPT_DRIFT_SUDDEN,
+        features_to_switch=CONCEPT_DRIFT_SWITCHING_FEATURES,
     )
-
     feature_names = dataset.feature_names
     n_samples = dataset.n_samples
-    print(n_samples)
     stream = dataset.stream
 
+    # Get Model / Loss and Training Procedure --------------------------------------------------------------------------
     task = dataset.task
-
     loss_function = get_loss_function(task=task)
     rolling_training_metric, training_metric = get_training_metric(task=task, rolling_window=TRAINING_METRIC_WINDOW)
-
     model, model_function = get_model(
         model_name=MODEL_NAME, task=task, feature_names=feature_names, **MODEL_PARAMS[MODEL_NAME])
 
+    # Get explainers ---------------------------------------------------------------------------------------------------
     incremental_sage = get_incremental_sage_explainer(
         feature_names=feature_names,
         model_function=model_function,
@@ -128,9 +129,12 @@ if __name__ == "__main__":
         model.learn_one(x_i, y_i)
         time_learning += time.time() - start_time
 
-        if n % 100 == 0:
+        if DEBUG and n % 100 == 0:
             print(f"{n}: x_i         {x_i}\n"
                   f"{n}: performance {rolling_training_metric.get()}\n"
                   f"{n}: inc-sage    {incremental_sage.importance_values}")
         if n >= n_samples:
             break
+
+    # Store the results in a database ----------------------------------------------------------------------------------
+    # TODO add storage mechanism

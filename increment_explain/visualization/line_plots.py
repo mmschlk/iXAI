@@ -68,6 +68,7 @@ def plot_multi_line_graph(
         x_data: Optional[Union[dict, Sequence]] = None,
         line_names: Optional[Union[dict, Sequence]] = None,
         names_to_highlight: Optional[list[str]] = None,
+        facet_not_to_highlight: Optional[list[str]] = None,
         line_styles: Optional[dict[str, str]] = None,
         std: Optional[Union[dict, Sequence]] = None,
         title: Optional[str] = None,
@@ -87,6 +88,9 @@ def plot_multi_line_graph(
         v_lines: Optional[list[dict]] = None,
         markevery: Optional[dict[str, int]] = None
 ) -> plt.axis:
+
+    if facet_not_to_highlight is None:
+        facet_not_to_highlight = []
 
     if names_to_highlight is None:
         names_to_highlight = line_names if line_names is not None else []
@@ -120,7 +124,9 @@ def plot_multi_line_graph(
                                                   item_id=line_name,
                                                   color_item_ids=names_to_highlight)
             line_colors[line_name] = color_line
-            alpha = 1. if line_name in names_to_highlight else 0.6
+            alpha = 1.
+            if line_name not in names_to_highlight or facet in facet_not_to_highlight:
+                alpha = 0.6
             axis.plot(x_facet[::markevery[facet]],
                       y_facet[line_name][::markevery[facet]],
                       ls=line_styles[facet],

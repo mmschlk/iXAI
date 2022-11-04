@@ -22,19 +22,20 @@ SAMPLE_STRATEGY = 'joint'
 
 if __name__ == "__main__":
 
+    # Get Data ---------------------------------------------------------------------------------------------------------
     dataset = get_dataset(DATASET_NAME, random_seed=DATASET_RANDOM_SEED)
     feature_names = dataset.feature_names
     n_samples = dataset.n_samples
-
     stream = dataset.stream
-    task = dataset.task
 
+    # Get Model / Loss and Training Procedure --------------------------------------------------------------------------
+    task = dataset.task
     loss_function = get_loss_function(task=task)
     training_metric = get_training_metric(task=task, rolling_window=TRAINING_METRIC_WINDOW)
-
     model, model_function = get_model(
         model_name=MODEL_NAME, task=task, feature_names=feature_names, **MODEL_PARAMS[MODEL_NAME])
 
+    # Get explainers ---------------------------------------------------------------------------------------------------
     incremental_explainer = get_incremental_sage_explainer(
         feature_names=feature_names,
         model_function=model_function,

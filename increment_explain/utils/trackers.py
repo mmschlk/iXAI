@@ -108,7 +108,7 @@ class SlidingWindowTracker:
         assert 0 < k, "The 'window_size' must be greater than zero."
         self.window_k = 0
         self.k = k
-        self.sliding_window = np.empty(shape=self.k)
+        self.sliding_window = np.array([np.NaN for _ in range(self.k)])
 
     def update(self, value_i: Union[int, float]):
         """Adds one value to the Tracker
@@ -135,14 +135,14 @@ class SlidingWindowTracker:
     @property
     def mean(self):
         """Returns the current mean of the sliding window"""
-        return float(np.mean(self.sliding_window, axis=0))
+        return float(np.nanmean(self.sliding_window, axis=0))
 
     @property
     def var(self):
         """Returns the variance of the sliding window"""
-        return float(np.var(self.sliding_window, axis=0))
+        return float(np.nanvar(self.sliding_window, axis=0))
 
     @property
     def std(self):
         """Returns the standard deviation of the sliding window"""
-        return float(np.std(self.sliding_window, axis=0))
+        return float(np.nanstd(self.sliding_window, axis=0))

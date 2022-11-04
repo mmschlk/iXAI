@@ -1,6 +1,6 @@
 import time
 
-from river.drift import ADWIN
+from river.drift import ADWIN, KSWIN, DDM, HDDM_A
 
 from experiments.setup.data import get_dataset, get_concept_drift_dataset
 from experiments.setup.explainer import get_incremental_sage_explainer, \
@@ -8,6 +8,9 @@ from experiments.setup.explainer import get_incremental_sage_explainer, \
 from experiments.setup.loss import get_loss_function, get_training_metric
 from experiments.setup.model import get_model
 
+from matplotlib import pyplot as plt
+
+from increment_explain.utils.trackers import SlidingWindowTracker
 from increment_explain.visualization import FeatureImportancePlotter
 
 DATASET_1_NAME = 'agrawal 1'
@@ -60,6 +63,10 @@ if __name__ == "__main__":
         model_name=MODEL_NAME, task=task, feature_names=feature_names, **MODEL_PARAMS[MODEL_NAME])
 
     performance_drift_detector = ADWIN(delta=0.001)
+    #fi_detectors = {feature_name: KSWIN(alpha=0.0001, window_size=500) for feature_name in feature_names}
+    fi_detectors = {feature_name: ADWIN(delta=0.00001) for feature_name in feature_names}
+    moving_average_large = SlidingWindowTracker(k=2000)
+    moving_average_small = SlidingWindowTracker(k=500)
 
 
     incremental_sage = get_incremental_sage_explainer(
@@ -81,6 +88,12 @@ if __name__ == "__main__":
 
     # Concept 1 ----------------------------------------------------------------------------------------------------
 
+    performance_drifts = []
+    fi_drifts = []
+
+    moving_average_large_values = []
+    moving_average_small_values = []
+
     model_performance = []
     time_pfi = 0.
     time_sage = 0.
@@ -95,13 +108,34 @@ if __name__ == "__main__":
         # predicting
         y_i_pred = model.predict_one(x_i)
         rolling_training_metric.update(y_true=y_i, y_pred=y_i_pred)
-        model_performance.append({'performance': rolling_training_metric.get()})
+        current_performance = rolling_training_metric.get()
+        model_performance.append({'performance': current_performance})
 
         # sage inc
         start_time = time.time()
         fi_values = incremental_sage.explain_one(x_i, y_i)
         time_sage += time.time() - start_time
         plotter.update(importance_values=fi_values, facet_name='inc-sage')
+
+        # concept drift detectors
+        performance_drift_detector.update(int(y_i == y_i_pred))
+        if performance_drift_detector.drift_detected:
+            performance_drifts.append(n)
+
+        detected_drifts = 0
+        for feature_name in ['salary']:
+
+            moving_average_large.update(fi_values[feature_name])
+            moving_average_large_values.append(moving_average_large.mean)
+            moving_average_small.update(fi_values[feature_name])
+            moving_average_small_values.append(moving_average_small.mean)
+
+            fi_detector = fi_detectors[feature_name]
+            fi_detector.update(fi_values[feature_name])
+            if fi_detector.drift_detected:
+                detected_drifts += 1
+                if detected_drifts >= 1:
+                    fi_drifts.append(n)
 
         # learning
         start_time = time.time()
@@ -115,6 +149,12 @@ if __name__ == "__main__":
         if n >= n_samples:
             break
 
+    v_lines = [{'x': CONCEPT_DRIFT_POSITION, 'ls': '--', 'c': 'black', 'linewidth': 1}]
+    v_lines.extend([{'x': performance_drift, 'ls': '--', 'c': 'red', 'linewidth': 1}
+                    for performance_drift in performance_drifts])
+    v_lines.extend([{'x': fi_drift, 'ls': '--', 'c': 'gray', 'linewidth': 1}
+                   for fi_drift in fi_drifts])
+
     plotter.plot(
         figsize=(5, 10),
         model_performance={'performance': model_performance},
@@ -122,8 +162,14 @@ if __name__ == "__main__":
         y_label='SAGE values',
         x_label='Samples',
         names_to_highlight=['salary', 'commission', 'age', 'elevel'],
-        v_lines=[{'x': CONCEPT_DRIFT_POSITION, 'ls': '--', 'c': 'black', 'linewidth': 1}],
+        v_lines=v_lines,
         h_lines=[{'y': 0., 'ls': '--', 'c': 'grey', 'linewidth': 1}],
         line_styles={'inc-sage': 'solid', 'int-sage': 'dashed', 'inc-pfi': 'dotted'},
         legend_style={}
     )
+
+    fig, axis = plt.subplots(nrows=1, ncols=1)
+    axis.plot(moving_average_large_values, color="blue")
+    axis.plot(moving_average_small_values, color="red")
+    axis.axvline(**{'x': CONCEPT_DRIFT_POSITION, 'ls': '--', 'c': 'black', 'linewidth': 1})
+    plt.show()

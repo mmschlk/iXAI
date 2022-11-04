@@ -62,8 +62,8 @@ def get_dataset(dataset_name, shuffle=False, random_seed=None, n_samples=None):
 def get_concept_drift_dataset(dataset_1_name: str, dataset_2_name: str,
                               dataset_1, dataset_2,
                               position: Union[float, int] = 0.5,
-                              width: Optional[Union[float, int]] = 0.05,
-                              features_to_switch: Optional[str] = None):
+                              width: Union[float, int] = 0.05,
+                              features_to_switch: Optional[Union[dict, str]] = None):
     dataset_name = dataset_1_name.split(' ')[0]
     stream_1 = dataset_1.stream
     if dataset_name in BATCH_DATASETS or dataset_name in STREAM_DATASETS:
@@ -74,7 +74,7 @@ def get_concept_drift_dataset(dataset_1_name: str, dataset_2_name: str,
         n_samples = dataset_1.n_samples + dataset_2.n_samples
     if position < 1:
         position = int(position * n_samples)
-    if width is not None and width < 1:
+    if width < 1:
         width = int(width * n_samples)
 
     # create the concept drift stream
@@ -82,6 +82,7 @@ def get_concept_drift_dataset(dataset_1_name: str, dataset_2_name: str,
         stream=stream_1, drift_stream=stream_2,
         position=position, width=width, feature_remapping=features_to_switch)
 
+    # create the new dataset that contains the concept drift stream
     dataset = StreamDataset(
         stream=concept_drift_stream,
         n_samples=n_samples,

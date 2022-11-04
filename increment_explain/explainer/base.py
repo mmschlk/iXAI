@@ -66,7 +66,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
     @staticmethod
     def _normalize_importance_values(
             importance_values: dict[str, float],
-            mode: str
+            mode: str = 'sum'
     ) -> dict[str, float]:
         """Given a data point, it updates the storage.
 

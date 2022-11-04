@@ -70,8 +70,6 @@ class FeatureImportancePlotter(BasePlotter):
             **line_kw
     ) -> None:
 
-
-
         if 'names_to_highlight' not in line_kw:
             line_kw['names_to_highlight'] = self.feature_names
         if 'line_names' not in line_kw:
