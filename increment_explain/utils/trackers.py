@@ -32,6 +32,9 @@ class BaseTracker:
     def __call__(self, *args, **kwargs):
         return self.tracked_value
 
+    def get(self):
+        return self.tracked_value
+
 
 # =============================================================================
 # Public Tracker Class

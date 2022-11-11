@@ -1,45 +1,36 @@
 import math
-import time
-
-import numpy as np
-import pandas as pd
 from river.datasets.base import REG
 
-from experiments.setup.data import get_dataset, get_concept_drift_dataset
-from experiments.setup.explainer import get_incremental_sage_explainer, \
-    get_interval_sage_explainer, get_incremental_pfi_explainer, get_imputer_and_storage
+from experiments.setup.data import get_dataset
+from experiments.setup.explainer import get_imputer_and_storage
 from experiments.setup.loss import get_loss_function, get_training_metric
 from experiments.setup.model import get_model
-from increment_explain.explainer import IncrementalPFI
-from increment_explain.explainer.sage import IntervalSageExplainer, IncrementalSageExplainer
-from increment_explain.utils.converters import RiverToPredictionFunction
+from increment_explain.explainer.sage import IncrementalSageExplainer
 from increment_explain.utils.trackers import ExponentialSmoothingTracker
 from increment_explain.visualization import FeatureImportancePlotter
 
 DEBUG = True
 
-DATASET_1_NAME = 'agrawal 1'
-DATASET_2_NAME = 'agrawal 2'
+DATASET_1_NAME = 'elec2'
 DATASET_RANDOM_SEED = 1
 SHUFFLE_DATA = False
-N_SAMPLES_1 = 10000
-N_SAMPLES_2 = 10000
+N_SAMPLES_1 = None
 
-CONCEPT_DRIFT_POSITION = 10000
+
 CONCEPT_DRIFT_WIDTH = 1
 CONCEPT_DRIFT_SWITCHING_FEATURES = None # {'salary': 'age'}
 
+TRAINING_METRIC_WINDOW = 500
 MODEL_NAME = 'ARF'
 
+CONFIDENCE_BOUNDS_1_DELTA = 0.1
+CONFIDENCE_BOUNDS_2_DELTA = 0.3
 N_INNER_SAMPLES: int = 1
 N_INTERVAL_LENGTH: int = 2000
-CONFIDENCE_BOUNDS_DELTA: float = 0.1
 SMOOTHING_ALPHA: float = 0.001
 FEATURE_REMOVAL_DISTRIBUTION: str = 'marginal joint'  # ['marginal joint', 'marginal product', 'conditional']
 RESERVOIR_LENGTH: int = 100
 RESERVOIR_KIND: str = 'geometric'  # ['geometric', 'uniform']
-
-TRAINING_METRIC_WINDOW = 500
 
 MODEL_PARAMS = {
     'ARF': {
@@ -51,16 +42,8 @@ MODEL_PARAMS = {
 if __name__ == "__main__":
 
     # Get Data ---------------------------------------------------------------------------------------------------------
-    dataset_1 = get_dataset(
+    dataset = get_dataset(
         dataset_name=DATASET_1_NAME, random_seed=DATASET_RANDOM_SEED, shuffle=SHUFFLE_DATA, n_samples=N_SAMPLES_1)
-    dataset_2 = get_dataset(
-        dataset_name=DATASET_2_NAME, random_seed=DATASET_RANDOM_SEED, shuffle=SHUFFLE_DATA, n_samples=N_SAMPLES_2)
-    dataset = get_concept_drift_dataset(
-        dataset_1_name=DATASET_1_NAME, dataset_2_name=DATASET_2_NAME,
-        dataset_1=dataset_1, dataset_2=dataset_2,
-        position=CONCEPT_DRIFT_POSITION, width=CONCEPT_DRIFT_WIDTH,
-        features_to_switch=CONCEPT_DRIFT_SWITCHING_FEATURES,
-    )
     feature_names = dataset.feature_names
     cat_feature_names = dataset.cat_feature_names
     num_feature_names = dataset.num_feature_names
@@ -74,7 +57,7 @@ if __name__ == "__main__":
     model, model_function = get_model(
         model_name=MODEL_NAME, task=task, feature_names=feature_names, **MODEL_PARAMS[MODEL_NAME])
 
-    # Get imputer and explainers ---------------------------------------------------------------------------------------
+    # Get explainers ---------------------------------------------------------------------------------------------------
     imputer, storage = get_imputer_and_storage(
         model_function=model_function,
         feature_removal_distribution=FEATURE_REMOVAL_DISTRIBUTION,
@@ -94,25 +77,7 @@ if __name__ == "__main__":
         n_inner_samples=N_INNER_SAMPLES
     )
 
-    incremental_pfi = IncrementalPFI(
-        model_function=model_function,
-        loss_function=loss_function,
-        imputer=imputer,
-        feature_names=feature_names,
-        smoothing_alpha=SMOOTHING_ALPHA,
-        n_samples=N_INNER_SAMPLES,
-        storage=storage
-    )
-
-    interval_explainer = IntervalSageExplainer(
-        model_function=model_function,
-        loss_function=loss_function,
-        feature_names=feature_names,
-        n_inner_samples=N_INNER_SAMPLES,
-        interval_length=N_INTERVAL_LENGTH
-    )
-
-    # warm-up because of errors ----------------------------------------------------------------------------------------
+    # warm-up because of errors ------------------------------------------------------------------------------------
     for (n, (x_i, y_i)) in enumerate(stream, start=1):
         model.learn_one(x_i, y_i)
         if n > 10:
@@ -122,14 +87,11 @@ if __name__ == "__main__":
         feature_names=feature_names
     )
 
-    time_pfi = 0.
-    time_sage = 0.
-    time_interval = 0.
-    time_learning = 0.
-
     sage_fi_values = []
-    interval_fi_values = []
-    pfi_fi_values = []
+
+    confidence_bounds_1 = []
+    confidence_bounds_2 = []
+    std = []
 
     model_loss_tracker = ExponentialSmoothingTracker(alpha=SMOOTHING_ALPHA)
     marginal_loss_tracker = ExponentialSmoothingTracker(alpha=SMOOTHING_ALPHA)
@@ -147,43 +109,26 @@ if __name__ == "__main__":
         marginal_loss.append({"loss": marginal_loss_tracker.get()})
 
         # sage inc
-        start_time = time.time()
         fi_values = incremental_sage.explain_one(x_i, y_i)
-        time_sage += time.time() - start_time
-        sage_fi_values.append(fi_values)
+
+        # storing data
         plotter.update(fi_values, facet_name='inc')
-
-        # pfi inc
-        start_time = time.time()
-        fi_values = incremental_pfi.explain_one(x_i, y_i, update_storage=False)
-        time_pfi += time.time() - start_time
-        pfi_fi_values.append(fi_values)
-        plotter.update(fi_values, facet_name='pfi')
-
-        # sage int
-        start_time = time.time()
-        fi_values = interval_explainer.explain_one(x_i, y_i)
-        time_interval += time.time() - start_time
-        interval_fi_values.append(fi_values)
-        plotter.update(fi_values, facet_name='int')
+        sage_fi_values.append(fi_values)
+        confidence_bounds_1.append(incremental_sage.get_confidence_bound(delta=CONFIDENCE_BOUNDS_1_DELTA))
+        confidence_bounds_2.append(incremental_sage.get_confidence_bound(delta=CONFIDENCE_BOUNDS_2_DELTA))
+        std.append({feature: math.sqrt(value.get()) for feature, value in incremental_sage.variances.items()})
 
         # learning
-        start_time = time.time()
         model.learn_one(x_i, y_i)
-        time_learning += time.time() - start_time
+
 
         if DEBUG and n % 1000 == 0:
-            print(f"{n}: x_i                 {x_i}\n"
-                  f"{n}: marginal-prediction {incremental_sage._marginal_prediction.get()}\n"
-                  f"{n}: model-loss          {model_loss_tracker.get()}\n"
-                  f"{n}: marginal-loss       {marginal_loss_tracker.get()}\n"
-                  f"{n}: diff                {marginal_loss_tracker.get() - model_loss_tracker.get()}\n"
-                  f"{n}: sum-sage            {sum(list(incremental_sage.importance_values.values()))}\n"
-                  f"{n}: inc-sage            {incremental_sage.importance_values}\n"
-                  f"{n}: inc-sage-bnd        {incremental_sage.get_confidence_bound(delta=CONFIDENCE_BOUNDS_DELTA)}\n"
-                  f"{n}: inc-sage-var        {incremental_sage.variances}\n\n"
-                  f"{n}: int-sage            {interval_explainer.importance_values}\n"
-                  f"{n}: pfi                 {incremental_pfi.importance_values}\n"
+            print(f"{n}: performance       {rolling_training_metric.get()}\n"
+                  f"{n}: inc-sage          {incremental_sage.importance_values}\n"
+                  f"{n}: sum-sage          {sum(list(incremental_sage.importance_values.values()))}\n"
+                  f"{n}: inc-sage-bnd (1)  {incremental_sage.get_confidence_bound(delta=CONFIDENCE_BOUNDS_1_DELTA)}\n"
+                  f"{n}: inc-sage-bnd (2)  {incremental_sage.get_confidence_bound(delta=CONFIDENCE_BOUNDS_2_DELTA)}\n"
+                  f"{n}: inc-sage-var      {incremental_sage.variances}\n"
                   )
 
         if n >= n_samples:
@@ -203,16 +148,32 @@ if __name__ == "__main__":
         figsize=(5, 10),
         model_performances={"model_loss": model_loss, "marginal_loss": marginal_loss},
         performance_kw=performance_kw,
-        title=f'Agrawal Stream with Concept Drift',
+        title=f"{DATASET_1_NAME} data stream, confidence bounds with " + r"$\delta =$ " + f"{CONFIDENCE_BOUNDS_1_DELTA}",
         y_label='SAGE values',
         x_label='Samples',
-        names_to_highlight=['salary', 'commission', 'age', 'elevel'],
-        v_lines=[{'x': CONCEPT_DRIFT_POSITION, 'ls': '--', 'c': 'black', 'linewidth': 1}],
+        names_to_highlight=['nswprice', 'vicprice', 'nswdemand'],
         h_lines=[{'y': 0., 'ls': '--', 'c': 'grey', 'linewidth': 1}],
-        line_styles={'inc': '-', 'int': '--', 'pfi': '-'},
-        legend_style={"fontsize": "small"},
-        markevery={'inc': 10, 'int': 1, 'pfi': 10},
-        facet_not_to_highlight=['pfi'],
-        y_min=-0.05,
-        y_max=0.42
+        line_styles={'inc': '-'},
+        legend_style={},
+        markevery={'inc': 10},
+        std={'inc': confidence_bounds_1},
+        y_min=-0.1,
+        y_max=0.75
+    )
+
+    plotter.plot(
+        figsize=(5, 10),
+        model_performances={"model_loss": model_loss, "marginal_loss": marginal_loss},
+        performance_kw=performance_kw,
+        title=f"{DATASET_1_NAME} data stream, confidence bounds with " + r"$\delta =$ " + f"{CONFIDENCE_BOUNDS_2_DELTA}",
+        y_label='SAGE values',
+        x_label='Samples',
+        names_to_highlight=['nswprice', 'vicprice', 'nswdemand'],
+        h_lines=[{'y': 0., 'ls': '--', 'c': 'grey', 'linewidth': 1}],
+        line_styles={'inc': '-'},
+        legend_style={},
+        markevery={'inc': 10},
+        std={'inc': confidence_bounds_2},
+        y_min=-0.1,
+        y_max=0.75
     )

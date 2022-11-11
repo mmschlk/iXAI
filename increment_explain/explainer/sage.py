@@ -4,7 +4,7 @@ This module gathers SAGE Explanation Methods
 
 # Authors: Maximilian Muschalik <maximilian.muschalik@lmu.de>
 #          Fabian Fumagalli <ffumagalli@techfak.uni-bielefeld.de>
-
+import math
 import random
 from typing import Optional, Callable, Any
 
@@ -15,7 +15,7 @@ from increment_explain.explainer import BaseIncrementalFeatureImportance
 from increment_explain.imputer import MarginalImputer, BaseImputer
 from increment_explain.storage import GeometricReservoirStorage, UniformReservoirStorage, IntervalStorage, BatchStorage
 from increment_explain.storage.base import BaseStorage
-
+from increment_explain.utils.trackers import ExponentialSmoothingTracker
 
 __all__ = [
     "IncrementalSageExplainer",
@@ -63,10 +63,19 @@ class IncrementalSageExplainer(BaseIncrementalFeatureImportance):
         self.n_inner_samples = n_inner_samples
         self._pfi_mode = pfi_mode
 
-    def explain_one(self, x_i, y_i):
+    def get_confidence_bound(self, delta: float):
+        assert 0 < delta <= 1., f"Delta must be float in the interval of ]0,1] and not {delta}."
+        return {
+            feature_name:
+                (1 - self._smoothing_alpha) ** self.seen_samples +
+                (1 / math.sqrt(delta)) * math.sqrt(self.variances[feature_name].get()) *
+                math.sqrt(self._smoothing_alpha / (2 - self._smoothing_alpha))
+            for feature_name in self.feature_names}
+
+    def explain_one(self, x_i, y_i, update_storage=True):
         if self.seen_samples >= 1:
             permutation_chain = np.random.permutation(self.feature_names)
-            y_i_pred = self.model_function(x_i)
+            y_i_pred = self.model_function(x_i)[0]
             self._marginal_prediction.update(y_i_pred)
             sample_loss = self._loss_function(y_true=y_i, y_prediction=self._marginal_prediction())
             features_not_in_S = set(self.feature_names)
@@ -82,8 +91,10 @@ class IncrementalSageExplainer(BaseIncrementalFeatureImportance):
                 marginal_contribution = sample_loss - feature_loss
                 sample_loss = feature_loss
                 self.importance_trackers[feature].update(marginal_contribution)
+                self.variances[feature].update((marginal_contribution - self.importance_values[feature])**2)
         self.seen_samples += 1
-        self.storage.update(x_i, y_i)
+        if update_storage:
+            self.storage.update(x_i, y_i)
         return self.importance_values
 
 
@@ -109,7 +120,7 @@ class BatchSageExplainer:
         self.imputer = imputer
         if imputer is None:
             self.imputer = MarginalImputer(
-                sampling_strategy='joint', model_function=self.model_function, storage_object=storage
+                sampling_strategy='joint', model_function=self.model_function, storage_object=self.storage
             )
         self.importance_values = {feature_name: 0. for feature_name in self.feature_names}
 

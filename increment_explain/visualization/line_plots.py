@@ -25,6 +25,7 @@ def _validate_y_x_data(y_data: Union[dict, Sequence],
                 line_names = ['X' + str(i) for i in range(len(y_data_facet))]
             y_data[y_key] = pd.DataFrame(y_data_facet, columns=line_names)
 
+
     if x_data is not None and isinstance(x_data, dict):
         x_keys = list(x_data.keys())
     else:
@@ -134,11 +135,14 @@ def plot_multi_line_graph(
                       alpha=alpha,
                       linewidth=1)
             if std_facet is not None:
-                axis.fill_between(x_facet[::, markevery[facet]],
+                std_alpha = STD_ALPHA
+                if line_name not in names_to_highlight:
+                    std_alpha = 0.
+                axis.fill_between(x_facet[::markevery[facet]],
                                   y_facet[line_name][::markevery[facet]] - std_facet[line_name][::markevery[facet]],
                                   y_facet[line_name][::markevery[facet]] + std_facet[line_name][::markevery[facet]],
                                   color=color_line,
-                                  alpha=STD_ALPHA,
+                                  alpha=std_alpha,
                                   linewidth=0.)
 
     if legend_style is not None:

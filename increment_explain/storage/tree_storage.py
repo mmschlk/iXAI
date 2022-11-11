@@ -1,3 +1,6 @@
+import random
+import typing
+
 import numpy as np
 from river import base
 
@@ -12,6 +15,23 @@ from river.ensemble import AdaptiveRandomForestRegressor, AdaptiveRandomForestCl
 from ..utils.trackers import WelfordTracker
 from river.metrics import R2, Accuracy
 from river.utils import Rolling
+
+
+def walk_through_tree(node, x_i, until_leaf=True) -> typing.Iterable[typing.Union["Branch", "Leaf"]]:
+    """Iterate over the nodes of the path induced by x_i."""
+    yield node
+    try:
+        yield from walk_through_tree(node.next(x_i), x_i, until_leaf)
+    except KeyError:
+        if until_leaf:
+            children = node.children
+            ratios = [child.total_weight for child in children]
+            node = random.choices(children, weights=ratios, k=1)[0]
+            yield node
+            yield from walk_through_tree(node, x_i, until_leaf)
+    except AttributeError:  # we are at a leaf node -> which was already returned
+        pass
+
 
 class MeanVarRegressor(base.Regressor):
 
@@ -70,18 +90,14 @@ class TreeStorage(BaseStorage):
 
     @staticmethod
     def get_path_through_tree(feature_model, x_i):
-        leaf_node = feature_model._root
-        if hasattr(leaf_node, 'traverse'):
-            leaf_node = feature_model._root.traverse(x_i)
-        leaf_id = id(leaf_node)
         walked_path = ''
-        path = iter(feature_model._root.walk(x_i, until_leaf=True))
+        path = iter(walk_through_tree(feature_model._root, x_i, until_leaf=True))
         for stop in path:
-            walked_path += str(stop) + " "
+            walked_path += str(stop) + "|"
             if hasattr(stop, 'repr_split'):
-                walked_path += str(stop.repr_split) + " "
+                walked_path += str(stop.repr_split) + "|"
                 branch_no = stop.branch_no(x_i)
-                walked_path += str(branch_no) + " "
+                walked_path += str(branch_no) + "|"
         return walked_path
 
     def _update_data_reservoirs(self, feature_name, feature_model, x_i, x):

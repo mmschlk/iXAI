@@ -1,3 +1,5 @@
+from typing import Optional
+
 from river.datasets import Bikes as RiverDataset
 from data.stream._base import StreamDataset
 
@@ -6,8 +8,11 @@ class Bike(StreamDataset):
 
     def __init__(
             self,
-            n_samples: int = 182470
+            n_samples: Optional[int] = 182470
     ):
+        if n_samples is None:
+            n_samples = 182470
+        assert n_samples <= 182470, f"Bike contains at maximum  182470 samples."
         stream = RiverDataset()
         feature_names = ['moment', 'station', 'clouds', 'description', 'humidity', 'pressure', 'temperature', 'wind']
         cat_feature_names = ['station', 'description']

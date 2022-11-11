@@ -35,7 +35,8 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
             self,
             x_i,
             y_i,
-            n_samples: Optional[int] = None
+            n_samples: Optional[int] = None,
+            update_storage: bool = True
     ):
         if self.seen_samples >= 1:
             if n_samples is None:
@@ -53,8 +54,10 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
                 # TODO - keep argument for ratio/constant in init - separate issue
                 pfi = avg_loss - original_loss
                 self._update_pfi(pfi, feature)
-        self.storage.update(x_i, y_i)
+                self.variances[feature].update((pfi - self.importance_values[feature]) ** 2)
         self.seen_samples += 1
+        if update_storage:
+            self.storage.update(x_i, y_i)
         return self.importance_values
 
     def _update_pfi(self, value, feature):

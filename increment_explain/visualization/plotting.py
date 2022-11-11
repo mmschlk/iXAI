@@ -1,6 +1,6 @@
 import copy
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union
+from typing import Optional, Union, Sequence
 
 import matplotlib.pyplot as plt
 
@@ -65,8 +65,8 @@ class FeatureImportancePlotter(BasePlotter):
     def plot(
             self,
             figsize: Optional[tuple[int, int]] = None,
-            model_performance: Optional[dict[str, list]] = None,
-            performance_ylim=(0., 1.),
+            model_performances: Optional[dict[str, Sequence]] = None,
+            performance_kw: Optional[dict] = None,
             **line_kw
     ) -> None:
 
@@ -75,7 +75,7 @@ class FeatureImportancePlotter(BasePlotter):
         if 'line_names' not in line_kw:
             line_kw['line_names'] = self.feature_names
 
-        if model_performance is not None:
+        if model_performances is not None:
             fig, (performance_axis, fi_axis) = plt.subplots(
                 nrows=2, ncols=1, sharex='col', sharey='row',
                 figsize=figsize, gridspec_kw={'height_ratios': [1, 4]}
@@ -88,17 +88,13 @@ class FeatureImportancePlotter(BasePlotter):
             v_lines = None
             if 'v_lines' in line_kw:
                 v_lines = line_kw['v_lines']
+            performance_kw = {} if performance_kw is None else performance_kw
             performance_axis = plot_multi_line_graph(
                 axis=performance_axis,
-                y_data=model_performance,
-                y_min=performance_ylim[0],
-                y_max=performance_ylim[1],
-                line_names=list(model_performance.keys()),
-                names_to_highlight=list(model_performance.keys()),
-                color_list=['red'],
+                y_data=model_performances,
                 title=title,
-                y_label=list(model_performance.keys())[0],
-                v_lines=v_lines
+                v_lines=v_lines,
+                **performance_kw
             )
         else:
             fig, fi_axis = plt.subplots()
