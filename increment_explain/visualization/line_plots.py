@@ -25,6 +25,7 @@ def _validate_y_x_data(y_data: Union[dict, Sequence],
                 line_names = ['X' + str(i) for i in range(len(y_data_facet))]
             y_data[y_key] = pd.DataFrame(y_data_facet, columns=line_names)
 
+
     if x_data is not None and isinstance(x_data, dict):
         x_keys = list(x_data.keys())
     else:
@@ -68,6 +69,7 @@ def plot_multi_line_graph(
         x_data: Optional[Union[dict, Sequence]] = None,
         line_names: Optional[Union[dict, Sequence]] = None,
         names_to_highlight: Optional[list[str]] = None,
+        facet_not_to_highlight: Optional[list[str]] = None,
         line_styles: Optional[dict[str, str]] = None,
         std: Optional[Union[dict, Sequence]] = None,
         title: Optional[str] = None,
@@ -87,6 +89,9 @@ def plot_multi_line_graph(
         v_lines: Optional[list[dict]] = None,
         markevery: Optional[dict[str, int]] = None
 ) -> plt.axis:
+
+    if facet_not_to_highlight is None:
+        facet_not_to_highlight = []
 
     if names_to_highlight is None:
         names_to_highlight = line_names if line_names is not None else []
@@ -120,7 +125,9 @@ def plot_multi_line_graph(
                                                   item_id=line_name,
                                                   color_item_ids=names_to_highlight)
             line_colors[line_name] = color_line
-            alpha = 1. if line_name in names_to_highlight else 0.6
+            alpha = 1.
+            if line_name not in names_to_highlight or facet in facet_not_to_highlight:
+                alpha = 0.6
             axis.plot(x_facet[::markevery[facet]],
                       y_facet[line_name][::markevery[facet]],
                       ls=line_styles[facet],
@@ -128,11 +135,14 @@ def plot_multi_line_graph(
                       alpha=alpha,
                       linewidth=1)
             if std_facet is not None:
-                axis.fill_between(x_facet[::, markevery[facet]],
+                std_alpha = STD_ALPHA
+                if line_name not in names_to_highlight:
+                    std_alpha = 0.
+                axis.fill_between(x_facet[::markevery[facet]],
                                   y_facet[line_name][::markevery[facet]] - std_facet[line_name][::markevery[facet]],
                                   y_facet[line_name][::markevery[facet]] + std_facet[line_name][::markevery[facet]],
                                   color=color_line,
-                                  alpha=STD_ALPHA,
+                                  alpha=std_alpha,
                                   linewidth=0.)
 
     if legend_style is not None:

@@ -10,8 +10,10 @@ class Stagger(StreamDataset):
             self,
             classification_function,
             random_seed: Optional[int] = None,
-            n_samples: int = 10000
+            n_samples: Optional[int] = 10000
     ):
+        if n_samples is None:
+            n_samples = 10000
         stream = RiverDataset(classification_function=classification_function, seed=random_seed)
         feature_names = ['size', 'color', 'shape']
         cat_feature_names = ['size', 'color', 'shape']

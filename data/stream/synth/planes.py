@@ -8,8 +8,10 @@ class Planes2D(StreamDataset):
     def __init__(
             self,
             random_seed: Optional[int] = None,
-            n_samples: int = 20000
+            n_samples:  Optional[int] = None
     ):
+        if n_samples is None:
+            n_samples = 20000
         stream = RiverDataset(seed=random_seed)
         feature_names = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         cat_feature_names = []

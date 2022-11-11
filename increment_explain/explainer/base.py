@@ -1,3 +1,4 @@
+import math
 from abc import ABCMeta
 from abc import abstractmethod
 from increment_explain.utils.trackers import ExponentialSmoothingTracker, WelfordTracker
@@ -46,11 +47,27 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
             self.importance_trackers = {
                 feature_name: ExponentialSmoothingTracker(alpha=self._smoothing_alpha) for feature_name in feature_names
             }
+            self.variances = {
+                feature_name: ExponentialSmoothingTracker(alpha=self._smoothing_alpha)
+                for feature_name in self.feature_names
+            }
         else:
             self._marginal_prediction = WelfordTracker()
             self.importance_trackers = {
                 feature_name: WelfordTracker() for feature_name in feature_names
             }
+            self.variances = {
+                feature_name: WelfordTracker() for feature_name in self.feature_names
+            }
+
+    def get_confidence_bound(self, delta: float):
+        assert 0 < delta <= 1., f"Delta must be float in the interval of ]0,1] and not {delta}."
+        return {
+            feature_name:
+                (1 - self._smoothing_alpha) ** self.seen_samples +
+                (1 / math.sqrt(delta)) * math.sqrt(self.variances[feature_name].get()) *
+                math.sqrt(self._smoothing_alpha / (2 - self._smoothing_alpha))
+            for feature_name in self.feature_names}
 
     @property
     def importance_values(self):
@@ -66,7 +83,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
     @staticmethod
     def _normalize_importance_values(
             importance_values: dict[str, float],
-            mode: str
+            mode: str = 'sum'
     ) -> dict[str, float]:
         """Given a data point, it updates the storage.
 

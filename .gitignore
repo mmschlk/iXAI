@@ -2,6 +2,7 @@
 workdirs/
 .idea/
 data/datasets/
+/experiments/iSAGE_paper/result_data
 
 # IDE and OS cache
 .idea

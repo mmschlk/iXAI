@@ -47,7 +47,7 @@ class BaseBatchDataset(metaclass=ABCMeta):
         if shuffle_dataset:
             dataset = shuffle(dataset, random_state=random_seed)
         if n_samples is not None:
-            dataset = dataset[0:n_samples+1]
+            dataset = dataset[0:n_samples]
         self.x_data = dataset
         self.y_data = dataset.pop(class_label)
         self.feature_names = list(self.x_data.columns)
