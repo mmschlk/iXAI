@@ -158,7 +158,8 @@ if __name__ == "__main__":
         markevery={'inc': 10},
         std={'inc': confidence_bounds_1},
         y_min=-0.1,
-        y_max=0.75
+        y_max=0.75,
+        save_name="result_data/confidence_bounds_delta_1.png"
     )
 
     plotter.plot(
@@ -175,5 +176,6 @@ if __name__ == "__main__":
         markevery={'inc': 10},
         std={'inc': confidence_bounds_2},
         y_min=-0.1,
-        y_max=0.75
+        y_max=0.75,
+        save_name="result_data/confidence_bounds_delta_2.png"
     )

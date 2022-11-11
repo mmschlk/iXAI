@@ -201,8 +201,8 @@ if __name__ == "__main__":
         line_styles={'cond': '-', 'marg': '--'},
         legend_style={"fontsize": "small"},
         markevery={'cond': 100, 'marg': 100},
-        facet_not_to_highlight=['marg'],
-        y_min=-0.05,
-        y_max=0.3
+        y_min=-0.049,
+        y_max=0.325,
+        save_name="result_data/conditional_vs_marginal.png"
     )
 

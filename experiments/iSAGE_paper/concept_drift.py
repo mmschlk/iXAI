@@ -214,5 +214,6 @@ if __name__ == "__main__":
         markevery={'inc': 10, 'int': 1, 'pfi': 10},
         facet_not_to_highlight=['pfi'],
         y_min=-0.05,
-        y_max=0.42
+        y_max=0.42,
+        save_name="result_data/concept_drift.png"
     )

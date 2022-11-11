@@ -145,6 +145,4 @@ if __name__ == "__main__":
 
     change_points_fi = pd.DataFrame(change_points_fi)
     change_points_fi['t'] = change_points
-    change_points_fi.to_csv("changes_detected.csv", index=False)
-
-
+    change_points_fi.to_csv("result_data/changes_detected.csv", index=False)

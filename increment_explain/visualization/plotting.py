@@ -67,7 +67,8 @@ class FeatureImportancePlotter(BasePlotter):
             figsize: Optional[tuple[int, int]] = None,
             model_performances: Optional[dict[str, Sequence]] = None,
             performance_kw: Optional[dict] = None,
-            **line_kw
+            save_name: Optional[str] = None,
+            **line_kw,
     ) -> None:
 
         if 'names_to_highlight' not in line_kw:
@@ -109,4 +110,6 @@ class FeatureImportancePlotter(BasePlotter):
             #x_data=self.x_data, TODO fix bug it's not plotting
             **line_kw
         )
+        if save_name is not None:
+            plt.savefig(save_name, dpi=200)
         plt.show()
