@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import Callable
+import typing
 
 
 class BaseImputer(ABC):
@@ -12,7 +12,7 @@ class BaseImputer(ABC):
     @abstractmethod
     def __init__(
             self,
-            model_function: Callable
+            model_function: typing.Callable
     ):
         self.model_function = model_function
 

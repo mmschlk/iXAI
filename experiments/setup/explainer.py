@@ -33,7 +33,7 @@ def get_imputer_and_storage(
             storage_object=storage,
             sampling_strategy=feature_removal_distribution.split(" ")[1]
         )
-    else:
+    elif feature_removal_distribution == 'conditional':
         assert cat_feature_names is not None and num_feature_names is not None, \
             "cat. and num. feature names must be provided"
 
@@ -48,6 +48,9 @@ def get_imputer_and_storage(
             use_storage=True,
             direct_predict_numeric=True
         )
+    else:
+        raise NotImplementedError(f"Only 'marginal joint', 'marginal product', and 'conditional' feature removal "
+                                  f"distributions are implemented. Not {feature_removal_distribution}")
 
     return imputer, storage
 
@@ -58,7 +61,6 @@ def get_incremental_sage_explainer(
         loss_function,
         distribution_kind: str = 'marginal',
         reservoir_kind: str = 'geometric',
-        sample_strategy: str = 'joint',
         reservoir_length: int = 1000,
         smoothing_alpha: float = 0.001,
         n_inner_samples: int = 1,
@@ -72,7 +74,6 @@ def get_incremental_sage_explainer(
         feature_removal_distribution=distribution_kind,
         reservoir_kind=reservoir_kind,
         reservoir_length=reservoir_length,
-        sample_strategy=sample_strategy,
         cat_feature_names=cat_feature_names,
         num_feature_names=num_feature_names
     )

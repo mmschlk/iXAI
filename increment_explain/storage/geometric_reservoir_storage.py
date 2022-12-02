@@ -4,15 +4,14 @@ import random
 
 
 class GeometricReservoirStorage(ReservoirStorage):
-
     """ Geometric Reservoir Storage
     """
 
     def __init__(
             self,
-            store_targets: bool,
             size: int,
-            constant_probability: float = None
+            constant_probability: float = None,
+            store_targets: bool = False
     ):
         super().__init__(
             size=size,

@@ -14,11 +14,11 @@ class BaseStorage(ABC):
         self._storage_y: List = []
 
     @abstractmethod
-    def update(self, x: Dict, y: Optional[Any]):
+    def update(self, x: Dict[str, Any], y: Optional[Any]):
         """Given a data point, it updates the storage.
 
         Args:
-            x: Features as List of Dicts
+            x: Features as Dict of feature names (keys) and feature values (values)
             y: Target as float or integer
             
         Returns:

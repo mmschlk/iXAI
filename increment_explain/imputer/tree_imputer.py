@@ -63,7 +63,7 @@ class TreeImputer(BaseImputer):
     def _sample_from_storages(self, feature_name, x_i, n_samples: int = 1):
         feature_model, feature_type = self.storage_object(feature_name)
         data_reservoir = self.storage_object.data_reservoirs[feature_name]
-        leaf_id = self.storage_object.get_path_through_tree(feature_model, x_i)
+        leaf_id = self.storage_object.get_path_through_tree(feature_model._root, x_i)
         try:
             storage = data_reservoir[leaf_id]
             x_storage, _ = storage.get_data()

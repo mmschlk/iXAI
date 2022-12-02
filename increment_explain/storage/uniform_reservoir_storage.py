@@ -4,8 +4,10 @@ import random
 
 
 class UniformReservoirStorage(ReservoirStorage):
-
     """ Uniform Reservoir Storage
+
+    Attributes:
+        stored_samples int: Number of samples seen in the stream.
     """
 
     def __init__(

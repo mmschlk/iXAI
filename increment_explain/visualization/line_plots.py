@@ -82,12 +82,14 @@ def plot_multi_line_graph(
         x_min: Optional[Union[int, float]] = None,
         x_max: Optional[Union[int, float]] = None,
         legend_style: Optional[dict] = None,
-        legend: Optional[dict[str, dict]] = None,
+        secondary_legends: Optional[list[dict[str, dict]]] = None,
         base_color: Optional[str] = None,
         color_list: Optional[list[str]] = None,
         h_lines: Optional[list[dict]] = None,
         v_lines: Optional[list[dict]] = None,
-        markevery: Optional[dict[str, int]] = None
+        markevery: Optional[dict[str, int]] = None,
+        tick_right: bool = False,
+        fill_between_props: Optional[list[dict]] = None
 ) -> plt.axis:
 
     if facet_not_to_highlight is None:
@@ -145,20 +147,53 @@ def plot_multi_line_graph(
                                   alpha=std_alpha,
                                   linewidth=0.)
 
+    if fill_between_props is not None:
+        for fill_between_prop in fill_between_props:
+            facet_1 = fill_between_prop['facet_1']
+            facet_2 = fill_between_prop['facet_2']
+            line_name_1 = fill_between_prop['line_name_1']
+            line_name_2 = fill_between_prop['line_name_2']
+            y_data_line_1 = y_data[facet_1][line_name_1][::markevery[facet_1]]
+            y_data_line_2 = y_data[facet_2][line_name_2][::markevery[facet_2]]
+            x_data_line = x_data[facet_1][::markevery[facet_1]]
+
+            color = None if 'color' not in fill_between_prop.keys() else fill_between_prop['color']
+            alpha = None if 'alpha' not in fill_between_prop.keys() else fill_between_prop['alpha']
+            hatch = None if 'hatch' not in fill_between_prop.keys() else fill_between_prop['hatch']
+
+            axis.fill_between(x_data_line, y_data_line_1, y_data_line_2,
+                              color=color,
+                              alpha=alpha,
+                              hatch=hatch,
+                              linewidth=0.)
+
     if legend_style is not None:
         for line_name in names_to_highlight:
             axis.plot([], label=line_name, color=line_colors[line_name])
-        axis.plot([], label='others', color=BASE_COLOR)
+        if len(names_to_highlight) < len(line_names):
+            axis.plot([], label='others', color=BASE_COLOR)
         axis.legend(edgecolor="0.8", fancybox=False, **legend_style)
 
-    if legend is not None:
-        for legend_item in legend['legend_items']:
-            axis.plot([], label=legend_item[0], color=legend_item[2], ls=legend_item[1])
-            axis.legend(edgecolor="0.8", fancybox=False, **legend['legend_props'])
+    if secondary_legends is not None:
+        for seconday_legend in secondary_legends:
+            ax2 = axis.twinx()
+            legend_lines = []
+            legend_labels = []
+            for legend_item in seconday_legend['legend_items']:
+                legend_labels.append(legend_item[0])
+                legend_line, = ax2.plot([], label=legend_item[0], color=legend_item[2], ls=legend_item[1])
+                legend_lines.append(legend_line)
+            ax2.get_yaxis().set_visible(False)
+            ax2.legend(legend_lines, legend_labels, edgecolor="0.8", fancybox=False, **seconday_legend['legend_props'])
+
 
     # name the y-axis
     if y_label is not None:
-        axis.set_ylabel(y_label)
+        if tick_right:
+            axis.set_ylabel(y_label, rotation=-90)
+            axis.yaxis.set_label_position("right")
+        else:
+            axis.set_ylabel(y_label)
 
     # name the x-axis
     if x_label is not None:
@@ -187,6 +222,8 @@ def plot_multi_line_graph(
     # specify ticks of the y-axis
     if y_ticks is not None:
         axis.set_yticks(y_ticks)
+    if tick_right:
+        axis.yaxis.tick_right()
 
     # specify ticks of the x-axis
     if x_ticks is not None:

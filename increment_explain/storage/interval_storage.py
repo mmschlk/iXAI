@@ -30,4 +30,4 @@ class IntervalStorage(BaseStorage):
                 self._storage_y.append(y)
 
     def get_data(self):
-        return (list(self._storage_x), list(self._storage_y))
+        return list(self._storage_x), list(self._storage_y)

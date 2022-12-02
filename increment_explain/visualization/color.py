@@ -3,7 +3,7 @@ from typing import Optional, Generator, Any, Iterable
 BASE_COLOR = '#a6a7a9'  # base color for elements in a plot that should not be highlighted / colored
 BACKGROUND_COLOR = '#f8f8f8'  # background color of plot objects (canvas)
 
-DEFAULT_COLOR_LIST = ['#ef27a6', '#4ea5d9', '#7d53de', '#44cfcb']  # default list of colors for highlighting elements
+DEFAULT_COLOR_LIST = ['#ef27a6', '#4ea5d9', '#7d53de', '#44cfcb', '#44001A']  # default list of colors for highlighting elements
 # in a plot
 
 STD_ALPHA = 0.25  # alpha-channel value for std tunnel around an element (line) for a plot
