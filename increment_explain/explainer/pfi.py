@@ -10,13 +10,13 @@ from typing import Optional, Union, Callable
 from .base import BaseIncrementalFeatureImportance
 import numpy as np
 from river.metrics.base import Metric
+from ..imputer import BaseImputer
+from ..storage.base import BaseStorage
+
 
 __all__ = [
     "IncrementalPFI",
 ]
-
-from ..imputer import BaseImputer
-from ..storage.base import BaseStorage
 
 
 class IncrementalPFI(BaseIncrementalFeatureImportance):
