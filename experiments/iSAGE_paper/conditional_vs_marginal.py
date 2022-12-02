@@ -17,16 +17,15 @@ from increment_explain.visualization import FeatureImportancePlotter
 
 DEBUG = True
 
-DATASET_1_NAME = 'agrawal 1'
+DATASET_1_NAME = 'elec2'
 
 DATASET_RANDOM_SEED = 1
 SHUFFLE_DATA = False
-N_SAMPLES_1 = 10000
-N_SAMPLES_2 = 1
+N_SAMPLES_1 = None
 
 MODEL_NAME = 'ARF'
 
-N_INNER_SAMPLES: int = 1
+N_INNER_SAMPLES: int = 2
 SMOOTHING_ALPHA: float = 0.001
 RESERVOIR_LENGTH: int = 100
 
@@ -129,13 +128,13 @@ if __name__ == "__main__":
         loss_i = loss_function(y_true=y_i, y_prediction=y_i_pred)
         model_loss_tracker_cond.update(loss_i)
         model_loss_cond.append({"loss": model_loss_tracker_cond.get()})
-        loss_marginal_i = loss_function(y_true=y_i, y_prediction=incremental_sage_cond._marginal_prediction.get())
+        loss_marginal_i = loss_function(y_true=y_i, y_prediction=incremental_sage_cond._marginal_prediction_tracker.get())
         marginal_loss_tracker_cond.update(loss_marginal_i)
         marginal_loss_cond.append({"loss": marginal_loss_tracker_cond.get()})
 
         model_loss_tracker_marg.update(loss_i)
         model_loss_marg.append({"loss": model_loss_tracker_marg.get()})
-        loss_marginal_i = loss_function(y_true=y_i, y_prediction=incremental_sage_cond._marginal_prediction.get())
+        loss_marginal_i = loss_function(y_true=y_i, y_prediction=incremental_sage_cond._marginal_prediction_tracker.get())
         marginal_loss_tracker_marg.update(loss_marginal_i)
         marginal_loss_marg.append({"loss": marginal_loss_tracker_marg.get()})
 
@@ -161,14 +160,14 @@ if __name__ == "__main__":
         if DEBUG and n % 1000 == 0:
             print(f"{n}: x_i                 {x_i}\n"
                   f"{n}: conditional\n"
-                  f"{n}: marginal-prediction {incremental_sage_cond._marginal_prediction.get()}\n"
+                  f"{n}: marginal-prediction {incremental_sage_cond._marginal_prediction_tracker.get()}\n"
                   f"{n}: model-loss          {model_loss_tracker_cond.get()}\n"
                   f"{n}: marginal-loss       {marginal_loss_tracker_cond.get()}\n"
                   f"{n}: diff                {marginal_loss_tracker_cond.get() - model_loss_tracker_cond.get()}\n"
                   f"{n}: sum-sage            {sum(list(incremental_sage_cond.importance_values.values()))}\n"
                   f"{n}: inc-sage            {incremental_sage_cond.importance_values}\n"
                   f"{n}: marginal\n"
-                  f"{n}: marginal-prediction {incremental_sage_marg._marginal_prediction.get()}\n"
+                  f"{n}: marginal-prediction {incremental_sage_marg._marginal_prediction_tracker.get()}\n"
                   f"{n}: model-loss          {model_loss_tracker_marg.get()}\n"
                   f"{n}: marginal-loss       {marginal_loss_tracker_marg.get()}\n"
                   f"{n}: diff                {marginal_loss_tracker_marg.get() - model_loss_tracker_marg.get()}\n"
@@ -180,6 +179,25 @@ if __name__ == "__main__":
             break
 
     # Store the results in a database ----------------------------------------------------------------------------------
+
+    data_folder = "conditional_marginal"
+    facet = "right.csv"
+
+    name = "cond_fi_values"
+    df = pd.DataFrame(sage_cond_fi_values)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    name = "marg_fi_values"
+    df = pd.DataFrame(sage_marg_fi_values)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    name = "model_loss"
+    df = pd.DataFrame(model_loss_cond)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    name = "marginal_loss"
+    df = pd.DataFrame(marginal_loss_cond)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
 
     performance_kw = {"y_min": 0, "y_max": 1, "y_label": "cross\nentropy", "color_list": ["red", "black"],
                       "line_names": ["loss"], "names_to_highlight": ['loss'],
@@ -205,4 +223,3 @@ if __name__ == "__main__":
         y_max=0.325,
         save_name="result_data/conditional_vs_marginal.png"
     )
-

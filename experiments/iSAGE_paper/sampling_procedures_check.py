@@ -208,7 +208,7 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, hspace=0, left=0.12, right=0.995)
-    plt.savefig("agrawal_conditonal_vs_marginal.png", dpi=200)
+    #plt.savefig("agrawal_conditonal_vs_marginal.png", dpi=200)
     plt.show()
 
     # plot covariance test ---------------------------------------------------------------------------------------------
@@ -239,15 +239,21 @@ if __name__ == "__main__":
         x_data_covariance_test['N_2'].loc[::markevery_step],
         marker="x", c="red", alpha=alpha_hue
     )
-    axis_3.axis(xmin=-3.8, xmax=3.8, ymin=-3.8, ymax=3.8)
+    axis_3.axis(xmin=-3.8, xmax=3.8, ymin=-4.8, ymax=3.8)
     axis_3.set_xlabel(r"$X_{2}$")
     axis_3.set_ylabel(r"$X_{1}$")
     axis_3.set_xticks([-3, -2, -1, 0, 1, 2, 3])
     axis_3.set_yticks([-3, -2, -1, 0, 1, 2, 3])
 
+    axis_3.scatter([], [], marker="o", c="black", label="data")
+    axis_3.scatter([], [], marker="+", c="blue", label="marginal")
+    axis_3.scatter([], [], marker="x", c="red", label="conditional")
+    axis_3.legend(loc="lower center", fontsize="small", frameon=True, ncol=3, columnspacing=0.5, handletextpad=0.1)
+
     plt.title(r"$\rho_{X_{1}, X_{2}} = 0.8$")
 
     plt.tight_layout()
     plt.subplots_adjust(wspace=0, hspace=0, left=0.18, right=0.99)
-    plt.savefig("covariance_conditonal_vs_marginal.png", dpi=200)
+
+    #plt.savefig("covariance_conditonal_vs_marginal.png", dpi=200)
     plt.show()

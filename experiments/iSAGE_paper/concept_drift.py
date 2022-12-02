@@ -22,17 +22,17 @@ DATASET_1_NAME = 'agrawal 1'
 DATASET_2_NAME = 'agrawal 2'
 DATASET_RANDOM_SEED = 1
 SHUFFLE_DATA = False
-N_SAMPLES_1 = 10000
-N_SAMPLES_2 = 10000
+N_SAMPLES_1 = 20000
+N_SAMPLES_2 = 20000
 
-CONCEPT_DRIFT_POSITION = 10000
+CONCEPT_DRIFT_POSITION = 20000
 CONCEPT_DRIFT_WIDTH = 1
 CONCEPT_DRIFT_SWITCHING_FEATURES = None # {'salary': 'age'}
 
 MODEL_NAME = 'ARF'
 
-N_INNER_SAMPLES: int = 1
-N_INTERVAL_LENGTH: int = 2000
+N_INNER_SAMPLES: int = 5
+N_INTERVAL_LENGTH: int = 5000
 CONFIDENCE_BOUNDS_DELTA: float = 0.1
 SMOOTHING_ALPHA: float = 0.001
 FEATURE_REMOVAL_DISTRIBUTION: str = 'marginal joint'  # ['marginal joint', 'marginal product', 'conditional']
@@ -142,7 +142,7 @@ if __name__ == "__main__":
         loss_i = loss_function(y_true=y_i, y_prediction=y_i_pred)
         model_loss_tracker.update(loss_i)
         model_loss.append({"loss": model_loss_tracker.get()})
-        loss_marginal_i = loss_function(y_true=y_i, y_prediction=incremental_sage._marginal_prediction.get())
+        loss_marginal_i = loss_function(y_true=y_i, y_prediction=incremental_sage._marginal_prediction_tracker.get())
         marginal_loss_tracker.update(loss_marginal_i)
         marginal_loss.append({"loss": marginal_loss_tracker.get()})
 
@@ -174,7 +174,7 @@ if __name__ == "__main__":
 
         if DEBUG and n % 1000 == 0:
             print(f"{n}: x_i                 {x_i}\n"
-                  f"{n}: marginal-prediction {incremental_sage._marginal_prediction.get()}\n"
+                  f"{n}: marginal-prediction {incremental_sage._marginal_prediction_tracker.get()}\n"
                   f"{n}: model-loss          {model_loss_tracker.get()}\n"
                   f"{n}: marginal-loss       {marginal_loss_tracker.get()}\n"
                   f"{n}: diff                {marginal_loss_tracker.get() - model_loss_tracker.get()}\n"
@@ -191,7 +191,30 @@ if __name__ == "__main__":
 
     # Store the results in a database ----------------------------------------------------------------------------------
 
-    performance_kw = {"y_min": 0, "y_max": 1, "y_label": "cross\nentropy", "color_list": ["red", "black"],
+    facet = "left.csv"
+    data_folder = "incremental_setting_5"
+
+    name = "inc_fi_values"
+    df = pd.DataFrame(sage_fi_values)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    name = "int_fi_values"
+    df = pd.DataFrame(interval_fi_values)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    name = "pfi_fi_values"
+    df = pd.DataFrame(pfi_fi_values)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    name = "model_loss"
+    df = pd.DataFrame(model_loss)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    name = "marginal_loss"
+    df = pd.DataFrame(marginal_loss)
+    df.to_csv(f"plots/{data_folder}/{'_'.join((name, facet))}", index=False)
+
+    performance_kw = {"y_min": 0, "y_max": 1, "y_label": "loss", "color_list": ["red", "black"],
                       "line_names": ["loss"], "names_to_highlight": ['loss'],
                       "line_styles": {"model_loss": "solid", "marginal_loss": "dashed"},
                       "markevery": {"model_loss": 100, "marginal_loss": 100},
