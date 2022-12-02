@@ -2,6 +2,7 @@
 workdirs/
 .idea/
 data/datasets/
+/experiments/iSAGE_paper/result_data
 
 # IDE and OS cache
 .idea
@@ -63,7 +64,7 @@ coverage.xml
 
 
 # Sphinx documentation
-docs/build/
+docs/_build/
 
 # PyBuilder
 target/
@@ -88,13 +89,13 @@ __pypackages__/
 # Environments
 .env
 .venv
+.venv_test_init_release
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
 venv*
-
 
 # mkdocs documentation
 /site
