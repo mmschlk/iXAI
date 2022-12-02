@@ -97,7 +97,6 @@ env.bak/
 venv.bak/
 venv*
 
-experiments
 # mkdocs documentation
 /site
 
