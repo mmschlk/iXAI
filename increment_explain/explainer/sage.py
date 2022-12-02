@@ -32,7 +32,6 @@ __all__ = [
 # =============================================================================
 
 
-
 class IncrementalSage(BaseIncrementalFeatureImportance):
     """Incremental SAGE Explainer
 
