@@ -89,6 +89,7 @@ __pypackages__/
 # Environments
 .env
 .venv
+.venv_test_init_release
 env/
 venv/
 ENV/
@@ -96,7 +97,7 @@ env.bak/
 venv.bak/
 venv*
 
-
+experiments
 # mkdocs documentation
 /site
 
