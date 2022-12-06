@@ -11,7 +11,7 @@ from river.utils import Rolling
 
 
 from .geometric_reservoir_storage import GeometricReservoirStorage
-from ..utils.trackers import WelfordTracker
+from ..utils.tracker.welford import WelfordTracker
 from .base import BaseStorage
 
 

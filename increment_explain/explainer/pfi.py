@@ -1,5 +1,5 @@
 """
-This module gathers SAGE Explanation Methods
+This module gathers PFI Explanation Methods
 """
 
 # Authors: Maximilian Muschalik <maximilian.muschalik@lmu.de>

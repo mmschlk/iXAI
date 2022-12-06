@@ -5,10 +5,6 @@ import river.datasets.synth.concept_drift_stream
 from river.metrics import Accuracy
 from river.utils import Rolling
 from river.ensemble import AdaptiveRandomForestClassifier
-from river.tree import HoeffdingTreeClassifier
-from river.linear_model import LogisticRegression
-from river import neural_net as nn
-from river.neighbors import KNNClassifier
 from matplotlib import pyplot as plt
 from river.datasets.base import BINARY_CLF
 
@@ -16,9 +12,9 @@ from data.stream._base import BatchStream
 from experiments.setup.explainer import get_imputer_and_storage
 from experiments.setup.loss import get_loss_function
 from increment_explain.explainer import IncrementalPFI
-from increment_explain.explainer.sage import IncrementalSageExplainer, BatchSageExplainer
+from increment_explain.explainer.sage import IncrementalSageExplainer
 from increment_explain.utils.converters import RiverToPredictionFunction
-from increment_explain.utils.trackers import ExponentialSmoothingTracker
+from increment_explain.utils.tracker.exponential_smoothing import ExponentialSmoothingTracker
 from increment_explain.visualization import FeatureImportancePlotter
 
 N_NODE_FEATURES = 1
@@ -169,9 +165,6 @@ def easy_problem(n=10_000, alpha=5, beta=5):
 
 
 if __name__ == "__main__":
-    import sys
-
-
 
     #print_probas(n=10_000)
 

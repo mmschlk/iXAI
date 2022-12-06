@@ -1,14 +1,13 @@
 import math
 
 import pandas as pd
-from river.datasets.base import REG
 
 from experiments.setup.data import get_dataset
 from experiments.setup.explainer import get_imputer_and_storage
 from experiments.setup.loss import get_loss_function, get_training_metric
 from experiments.setup.model import get_model
 from increment_explain.explainer.sage import IncrementalSageExplainer
-from increment_explain.utils.trackers import ExponentialSmoothingTracker
+from increment_explain.utils.tracker.exponential_smoothing import ExponentialSmoothingTracker
 from increment_explain.visualization import FeatureImportancePlotter
 
 DEBUG = True

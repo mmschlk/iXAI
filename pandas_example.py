@@ -13,7 +13,7 @@ from increment_explain.explainer import IncrementalPFI
 from increment_explain.explainer.sage import IncrementalSage, IntervalSage
 from increment_explain.imputer import MarginalImputer
 from increment_explain.storage import GeometricReservoirStorage
-from increment_explain.utils.wrappers import RiverToPredictionFunction
+from increment_explain.utils.wrappers import RiverPredictionFunctionWrapper
 
 if __name__ == "__main__":
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # model
     model = AdaptiveRandomForestRegressor(n_models=15)  # most important hyperparameter is n_models
     model = compose.Pipeline(preprocessing.StandardScaler(), model)
-    model_function = RiverToPredictionFunction(model.predict_one)
+    model_function = RiverPredictionFunctionWrapper(model.predict_one)
 
     # performance metric and loss
     loss_metric = MSE()  # real metric can be everything from river.metrics used for explanations

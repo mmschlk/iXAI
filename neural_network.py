@@ -11,7 +11,7 @@ from increment_explain.explainer import IncrementalPFI
 from increment_explain.explainer.sage import IncrementalSage, IntervalSage
 from increment_explain.imputer import MarginalImputer
 from increment_explain.storage import GeometricReservoirStorage
-from increment_explain.utils.wrappers.river import RiverToPredictionFunction
+from increment_explain.utils.wrappers.river import RiverPredictionFunctionWrapper
 from increment_explain.utils.wrappers.torch import TorchSupervisedLearningWrapper
 
 N_SAMPLES = 10_000
@@ -49,7 +49,7 @@ if __name__ == "__main__":
     model = TorchSupervisedLearningWrapper(
         model=network, loss_function=network_loss_function, optimizer=network_optimizer, n_classes=N_CLASSES)
     model = compose.Pipeline(preprocessing.StandardScaler(), model)
-    model_function = RiverToPredictionFunction(model.predict_one)
+    model_function = RiverPredictionFunctionWrapper(model.predict_one)
 
     # Get imputer and explainers ---------------------------------------------------------------------------------------
     storage = GeometricReservoirStorage(
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         model_function=model_function,
         loss_function=loss_metric,
         feature_names=feature_names,
-        interval_length=1000,
+        interval_length=2000,
         n_inner_samples=5
     )
 

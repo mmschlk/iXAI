@@ -10,12 +10,10 @@ import random
 from typing import Optional, Callable, Any, Union
 
 from river.metrics.base import Metric
-
-
 import numpy as np
 from tqdm import tqdm
 
-from increment_explain.explainer import BaseIncrementalFeatureImportance
+from increment_explain.explainer.base import BaseIncrementalFeatureImportance
 from increment_explain.imputer import MarginalImputer, BaseImputer
 from increment_explain.storage import IntervalStorage, BatchStorage
 from increment_explain.storage.base import BaseStorage

@@ -1,19 +1,14 @@
-import math
 import time
 
-import numpy as np
 import pandas as pd
-from river.datasets.base import REG
 
 from experiments.setup.data import get_dataset, get_concept_drift_dataset
-from experiments.setup.explainer import get_incremental_sage_explainer, \
-    get_interval_sage_explainer, get_incremental_pfi_explainer, get_imputer_and_storage
+from experiments.setup.explainer import get_imputer_and_storage
 from experiments.setup.loss import get_loss_function, get_training_metric
 from experiments.setup.model import get_model
 from increment_explain.explainer import IncrementalPFI
 from increment_explain.explainer.sage import IntervalSageExplainer, IncrementalSageExplainer
-from increment_explain.utils.converters import RiverToPredictionFunction
-from increment_explain.utils.trackers import ExponentialSmoothingTracker
+from increment_explain.utils.tracker.exponential_smoothing import ExponentialSmoothingTracker
 from increment_explain.visualization import FeatureImportancePlotter
 
 DEBUG = True
