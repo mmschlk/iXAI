@@ -41,7 +41,7 @@ class RiverSingletonMetricToLossFunction(RiverMetricToLossFunction):
     def __call__(self, y_true, y_prediction):
         try:
             y_prediction = float(y_prediction[0])
-        except TypeError:
+        except (TypeError, IndexError):
             y_prediction = float(y_prediction)
         loss_i = self._river_metric.update(y_true=y_true, y_pred=y_prediction).get()
         self._river_metric.revert(y_true=y_true, y_pred=y_prediction)
