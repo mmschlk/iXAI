@@ -1,19 +1,19 @@
 import pandas as pd
 
 from river.stream import iter_pandas
-from river.ensemble import AdaptiveRandomForestRegressor
 from river.metrics import MSE
 from river.utils import Rolling
-from river import preprocessing, compose
 
 from sklearn.datasets import fetch_california_housing
 from sklearn.utils import shuffle
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
 
 from increment_explain.explainer import IncrementalPFI
 from increment_explain.explainer.sage import IncrementalSage, IntervalSage
 from increment_explain.imputer import MarginalImputer
 from increment_explain.storage import GeometricReservoirStorage
-from increment_explain.utils.wrappers import RiverPredictionFunctionWrapper
+from increment_explain.utils.wrappers import SklearnWrapper
 
 if __name__ == "__main__":
 
@@ -23,12 +23,16 @@ if __name__ == "__main__":
     data_y = data_y - data_y.mean() / (data_y.max() - data_y.min())
     data_x, data_y = shuffle(data_x, data_y)  # of course don't shuffle real stream data
 
+    train_x, test_x, train_y, test_y = train_test_split(data_x, data_y, test_size=0.25)
+
     feature_names = data['feature_names']
 
     # model
-    model = AdaptiveRandomForestRegressor(n_models=15)  # most important hyperparameter is n_models
-    model = compose.Pipeline(preprocessing.StandardScaler(), model)
-    model_function = RiverPredictionFunctionWrapper(model.predict_one)
+    model = RandomForestRegressor(n_estimators=15)
+    model.fit(train_x.values, train_y)
+    print(model.score(test_x.values, test_y))
+
+    model_function = SklearnWrapper(model.predict)
 
     # performance metric and loss
     loss_metric = MSE()  # real metric can be everything from river.metrics used for explanations
@@ -76,15 +80,13 @@ if __name__ == "__main__":
 
     # main training loop data_x and data_y needs to be pd.DataFrames and / or pd.Series
     for n, (x_i, y_i) in enumerate(iter_pandas(data_x, data_y), start=1):
-        y_i_pred = model.predict_one(x_i)
+        y_i_pred = model_function(x_i)[0][0]
         training_metric.update(y_true=y_i, y_pred=y_i_pred)
 
         # sage inc
         _ = incremental_sage.explain_one(x_i, y_i)
         _ = interval_sage.explain_one(x_i, y_i)
         _ = incremental_pfi.explain_one(x_i, y_i, update_storage=False)
-
-        model.learn_one(x_i, y_i)
 
         if n % 1000 == 0:
             print(f"{n}: perf                {training_metric.get()}\n"

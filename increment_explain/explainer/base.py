@@ -14,8 +14,10 @@ import typing
 from increment_explain.imputer import BaseImputer, MarginalImputer
 from increment_explain.storage import GeometricReservoirStorage, UniformReservoirStorage
 from increment_explain.storage.base import BaseStorage
-from increment_explain.utils.trackers import ExponentialSmoothingTracker, WelfordTracker, MultiValueTracker, Tracker
+from increment_explain.utils.tracker.base import Tracker
+from increment_explain.utils.tracker import MultiValueTracker, WelfordTracker, ExponentialSmoothingTracker
 from increment_explain.utils.validators.loss import validate_loss_function
+from increment_explain.utils.validators.model import validate_model_function
 
 
 class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
@@ -41,7 +43,7 @@ class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
             model_function (Callable): The Model function to be explained.
             feature_names (list): List of feature names to be explained for the model.
         """
-        self._model_function = model_function
+        self._model_function = validate_model_function(model_function)
         self.feature_names = feature_names
         self.number_of_features: int = len(feature_names)
         self.seen_samples: int = 0

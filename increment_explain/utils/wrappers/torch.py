@@ -1,9 +1,21 @@
-import torch
+from increment_explain.utils.wrappers.base import Wrapper
+
+try:
+    import torch
+except ImportError:
+    pass
 
 
-class TorchSupervisedLearningWrapper:
+class TorchSupervisedLearningWrapper(Wrapper):
+    """Basic wrapper for torch classification models.
 
-    def __init__(self, model, optimizer, loss_function, n_classes: int = 2, class_labels: list[str] = None):
+    Warning: This wrapper entails only very basic functionality.
+    This wrapper is only intend for basic supervised learning tasks solved with torch.
+
+    This wrapper turns any prediction function output into an iterable (list or np.ndarray) output.
+    """
+
+    def __init__(self, model, optimizer, loss_function, n_classes: int = 1, class_labels: list[str] = None):
         self.model = model
         self.optimizer = optimizer
         self.loss_function = loss_function
@@ -45,3 +57,6 @@ class TorchSupervisedLearningWrapper:
         loss = self.loss_function(y_pred, y_tensor)
         loss.backward()
         self.optimizer.step()
+
+    def __call__(self, x_i):
+        return self.predict_one(x_i)
