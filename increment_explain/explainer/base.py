@@ -140,7 +140,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
         return {
             feature_name:
                 (1 - self._smoothing_alpha) ** self.seen_samples +
-                (1 / math.sqrt(delta)) * math.sqrt(self.variances[feature_name].get()) *
+                (1 / math.sqrt(delta)) * math.sqrt(self.variances[feature_name]) *
                 math.sqrt(self._smoothing_alpha / (2 - self._smoothing_alpha))
             for feature_name in self.feature_names}
 
