@@ -68,13 +68,13 @@ class FeatureImportancePlotter(BasePlotter):
             model_performances: Optional[dict[str, Sequence]] = None,
             performance_kw: Optional[dict] = None,
             save_name: Optional[str] = None,
-            **line_kw,
+            **plot_kw,
     ) -> None:
 
-        if 'names_to_highlight' not in line_kw:
-            line_kw['names_to_highlight'] = self.feature_names
-        if 'line_names' not in line_kw:
-            line_kw['line_names'] = self.feature_names
+        if 'names_to_highlight' not in plot_kw:
+            plot_kw['names_to_highlight'] = self.feature_names
+        if 'line_names' not in plot_kw:
+            plot_kw['line_names'] = self.feature_names
 
         if model_performances is not None:
             fig, (performance_axis, fi_axis) = plt.subplots(
@@ -83,12 +83,12 @@ class FeatureImportancePlotter(BasePlotter):
             )
             plt.subplots_adjust(hspace=0.000, wspace=0.000)
             title = None
-            if 'title' in line_kw:
-                title = copy.copy(line_kw['title'])
-                del line_kw['title']
+            if 'title' in plot_kw:
+                title = copy.copy(plot_kw['title'])
+                del plot_kw['title']
             v_lines = None
-            if 'v_lines' in line_kw:
-                v_lines = line_kw['v_lines']
+            if 'v_lines' in plot_kw:
+                v_lines = plot_kw['v_lines']
             performance_kw = {} if performance_kw is None else performance_kw
             performance_axis = plot_multi_line_graph(
                 axis=performance_axis,
@@ -108,7 +108,7 @@ class FeatureImportancePlotter(BasePlotter):
             axis=fi_axis,
             y_data=self.y_data,
             #x_data=self.x_data, TODO fix bug it's not plotting
-            **line_kw
+            **plot_kw
         )
         if save_name is not None:
             plt.savefig(save_name, dpi=200)
