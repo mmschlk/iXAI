@@ -7,7 +7,7 @@ import typing
 
 import numpy as np
 
-from increment_explain.utils.wrappers.base import Wrapper
+from ixai.utils.wrappers.base import Wrapper
 
 
 class RiverPredictionFunctionWrapper(Wrapper):

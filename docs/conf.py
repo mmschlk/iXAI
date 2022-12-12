@@ -6,7 +6,7 @@
 from sphinx.builders.html import StandaloneHTMLBuilder
 import os
 import sys
-import increment_explain
+import ixai
 
 
 sys.path.insert(0, os.path.abspath("../.."))
@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath("../.."))
 project = 'IncrementExplain'
 copyright = '2022, Maximilian Muschalik, Rohit Jagtani'
 author = 'Maximilian Muschalik, Rohit Jagtani'
-release = increment_explain.__version__
-version = increment_explain.__version__
+release = ixai.__version__
+version = ixai.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

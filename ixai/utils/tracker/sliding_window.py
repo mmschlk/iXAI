@@ -2,7 +2,7 @@ from typing import Union
 
 import numpy as np
 
-from increment_explain.utils.tracker.base import Tracker
+from ixai.utils.tracker.base import Tracker
 
 
 class SlidingWindowTracker(Tracker):

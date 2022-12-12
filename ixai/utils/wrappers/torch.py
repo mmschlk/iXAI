@@ -1,4 +1,4 @@
-from increment_explain.utils.wrappers.base import Wrapper
+from ixai.utils.wrappers.base import Wrapper
 
 try:
     import torch

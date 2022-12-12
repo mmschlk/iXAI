@@ -1,8 +1,8 @@
 import pytest
-from increment_explain.storage import (BatchStorage, IntervalStorage,
-                                       SequenceStorage,
-                                       UniformReservoirStorage,
-                                       GeometricReservoirStorage)
+from ixai.storage import (BatchStorage, IntervalStorage,
+                          SequenceStorage,
+                          UniformReservoirStorage,
+                          GeometricReservoirStorage)
 
 
 @pytest.fixture

@@ -4,8 +4,8 @@ from typing import Optional, Union, Sequence
 
 import matplotlib.pyplot as plt
 
-from increment_explain.visualization.config import SAVE_DPI
-from increment_explain.visualization.line_plots import plot_multi_line_graph
+from ixai.visualization.config import SAVE_DPI
+from ixai.visualization.line_plots import plot_multi_line_graph
 
 __all__ = [
     "FeatureImportancePlotter"

@@ -7,12 +7,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-from increment_explain.explainer import IncrementalPFI
-from increment_explain.explainer.sage import IncrementalSage, IntervalSage
-from increment_explain.imputer import MarginalImputer
-from increment_explain.storage import GeometricReservoirStorage
-from increment_explain.utils.wrappers.river import RiverPredictionFunctionWrapper
-from increment_explain.utils.wrappers.torch import TorchSupervisedLearningWrapper
+from ixai.explainer import IncrementalPFI
+from ixai.explainer.sage import IncrementalSage, IntervalSage
+from ixai.imputer import MarginalImputer
+from ixai.storage import GeometricReservoirStorage
+from ixai.utils.wrappers.river import RiverPredictionFunctionWrapper
+from ixai.utils.wrappers.torch import TorchSupervisedLearningWrapper
 
 N_SAMPLES = 10_000
 

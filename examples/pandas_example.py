@@ -9,11 +9,11 @@ from river import preprocessing, compose
 from sklearn.datasets import fetch_california_housing
 from sklearn.utils import shuffle
 
-from increment_explain.explainer import IncrementalPFI
-from increment_explain.explainer.sage import IncrementalSage, IntervalSage
-from increment_explain.imputer import MarginalImputer
-from increment_explain.storage import GeometricReservoirStorage
-from increment_explain.utils.wrappers import RiverPredictionFunctionWrapper
+from ixai.explainer import IncrementalPFI
+from ixai.explainer.sage import IncrementalSage, IntervalSage
+from ixai.imputer import MarginalImputer
+from ixai.storage import GeometricReservoirStorage
+from ixai.utils.wrappers import RiverPredictionFunctionWrapper
 
 if __name__ == "__main__":
 
