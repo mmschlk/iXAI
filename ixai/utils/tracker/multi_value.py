@@ -2,7 +2,7 @@ import copy
 
 import numpy as np
 
-from increment_explain.utils.tracker.base import Tracker
+from ixai.utils.tracker.base import Tracker
 
 
 class MultiValueTracker(Tracker):

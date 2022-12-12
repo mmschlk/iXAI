@@ -13,11 +13,11 @@ from river.metrics.base import Metric
 import numpy as np
 from tqdm import tqdm
 
-from increment_explain.explainer.base import BaseIncrementalFeatureImportance
-from increment_explain.imputer import MarginalImputer, BaseImputer
-from increment_explain.storage import IntervalStorage, BatchStorage
-from increment_explain.storage.base import BaseStorage
-from increment_explain.utils.validators.loss import validate_loss_function
+from ixai.explainer.base import BaseIncrementalFeatureImportance
+from ixai.imputer import MarginalImputer, BaseImputer
+from ixai.storage import IntervalStorage, BatchStorage
+from ixai.storage.base import BaseStorage
+from ixai.utils.validators.loss import validate_loss_function
 
 __all__ = [
     "IncrementalSage",

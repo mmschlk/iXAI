@@ -1,6 +1,6 @@
 import math
 from typing import Callable
-from increment_explain.storage.tree_storage import TreeStorage
+from ixai.storage.tree_storage import TreeStorage
 from .base import BaseImputer
 from river.base import Classifier, Regressor
 from river.tree import HoeffdingTreeRegressor

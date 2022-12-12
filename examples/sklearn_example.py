@@ -9,11 +9,11 @@ from sklearn.utils import shuffle
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 
-from increment_explain.explainer import IncrementalPFI
-from increment_explain.explainer.sage import IncrementalSage, IntervalSage
-from increment_explain.imputer import MarginalImputer
-from increment_explain.storage import GeometricReservoirStorage
-from increment_explain.utils.wrappers import SklearnWrapper
+from ixai.explainer import IncrementalPFI
+from ixai.explainer.sage import IncrementalSage, IntervalSage
+from ixai.imputer import MarginalImputer
+from ixai.storage import GeometricReservoirStorage
+from ixai.utils.wrappers import SklearnWrapper
 
 if __name__ == "__main__":
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     # performance metric and loss
     loss_metric = MSE()  # real metric can be everything from river.metrics used for explanations
-    training_metric = Rolling(MSE(), window_size=1000) # metric wrapper to summarize individual prediction losses
+    training_metric = Rolling(MSE(), window_size=1000)  # metric wrapper to summarize individual prediction losses
 
     # Get imputer and explainers ---------------------------------------------------------------------------------------
     storage = GeometricReservoirStorage(

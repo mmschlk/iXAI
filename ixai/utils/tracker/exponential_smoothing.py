@@ -1,6 +1,6 @@
 from typing import Union
 
-from increment_explain.utils.tracker.base import Tracker
+from ixai.utils.tracker.base import Tracker
 
 
 class ExponentialSmoothingTracker(Tracker):

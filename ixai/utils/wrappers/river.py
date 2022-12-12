@@ -7,7 +7,7 @@ import typing
 
 import numpy as np
 
-from increment_explain.utils.wrappers.base import Wrapper
+from ixai.utils.wrappers.base import Wrapper
 
 
 class RiverPredictionFunctionWrapper(Wrapper):
@@ -28,6 +28,7 @@ class RiverPredictionFunctionWrapper(Wrapper):
     def __init__(self, river_predict_function: typing.Callable):
         self._river_predict_function = river_predict_function
         self._max_labels = 1
+        self._seen_labels = {0: 0, 1: 1, False: 0, True: 1}
 
     def _reduce_dict(self, y_prediction):
         """Transforms a prediction output into a list if it is a dictionary."""
@@ -36,7 +37,10 @@ class RiverPredictionFunctionWrapper(Wrapper):
         self._max_labels = max(self._max_labels, max(y_prediction))
         y_arr = np.zeros(shape=self._max_labels + 1)
         for key, value in y_prediction.items():
-            y_arr[key] = value
+            y_arr[self._seen_labels[key]] = value
+            if key not in self._seen_labels.keys():
+                self._seen_labels[key] = self._max_labels + 1
+                self._max_labels += 1
         return y_arr
 
     def __call__(self, x: typing.Union[typing.List[dict], dict]):
