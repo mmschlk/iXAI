@@ -27,20 +27,21 @@ class RiverPredictionFunctionWrapper(Wrapper):
 
     def __init__(self, river_predict_function: typing.Callable):
         self._river_predict_function = river_predict_function
-        self._max_labels = 1
+        self._max_labels = 2
         self._seen_labels = {0: 0, 1: 1, False: 0, True: 1}
+        self._set_labels = 1
 
     def _reduce_dict(self, y_prediction):
         """Transforms a prediction output into a list if it is a dictionary."""
         if not isinstance(y_prediction, dict):
             return np.asarray([y_prediction])
-        self._max_labels = max(self._max_labels, max(y_prediction))
-        y_arr = np.zeros(shape=self._max_labels + 1)
+        self._max_labels = max(self._max_labels, len(y_prediction))
+        y_arr = np.zeros(shape=self._max_labels)
         for key, value in y_prediction.items():
-            y_arr[self._seen_labels[key]] = value
             if key not in self._seen_labels.keys():
-                self._seen_labels[key] = self._max_labels + 1
-                self._max_labels += 1
+                self._seen_labels[key] = self._set_labels + 1
+                self._set_labels += 1
+            y_arr[self._seen_labels[key]] = value
         return y_arr
 
     def __call__(self, x: typing.Union[typing.List[dict], dict]):
