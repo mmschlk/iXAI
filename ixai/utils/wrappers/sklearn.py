@@ -31,7 +31,9 @@ class SklearnWrapper(Wrapper):
     def __call__(self, x: typing.Union[dict, typing.Sequence]):
         if isinstance(x, dict):
             x_list = [list(x.values())]
-            y_pred = np.asarray([self.prediction_function(x_list)])
+            y_pred = self.prediction_function(x_list)
+            if len(y_pred.shape) == 1:
+                y_pred = np.asarray([y_pred])
         else:
             y_pred = np.empty(shape=len(x))
             for i in range(len(x)):
