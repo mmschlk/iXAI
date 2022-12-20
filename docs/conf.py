@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'IncrementExplain'
+project = 'iXAI'
 copyright = '2022, Maximilian Muschalik, Rohit Jagtani'
 author = 'Maximilian Muschalik, Rohit Jagtani'
 release = ixai.__version__
@@ -69,7 +69,7 @@ html_theme = "pydata_sphinx_theme"
 html_context = {"default_mode": "auto"}
 html_theme_options = {
     "icon_links": [
-        {"name": "GitHub", "url": "https://github.com/mmschlk/IncrementExplain.git", "icon": "fab fa-github-square"},
+        {"name": "GitHub", "url": "https://github.com/mmschlk/iXAI.git", "icon": "fab fa-github-square"},
     ],
     "collapse_navigation": True,
     "navigation_depth": 3,
