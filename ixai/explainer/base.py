@@ -116,7 +116,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
         """Normalizes the importance scores.
 
         Args:
-            mode (str): The normalization mode to be applied. Possible values are 'sum' and 'delta'.
+            mode (str): The normalization mode to be applied. Possible values are 'sum' and 'delta'. Defaults to 'sum'.
                 - sum: Normalizes the importance scores by division through the sum of importance scores.
                 - delta: Normalizes the importance scores by division through the difference between the max of the
                 importance scores and the min of the importance scores.
