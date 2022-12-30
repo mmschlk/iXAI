@@ -40,4 +40,4 @@ class BaseStorage(ABC):
         Returns:
             List of Features and targets in storage as tuple.
         """
-        return (self._storage_x, self._storage_y)
+        return self._storage_x, self._storage_y

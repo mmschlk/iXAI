@@ -13,11 +13,11 @@ from river.metrics.base import Metric
 import numpy as np
 from tqdm import tqdm
 
-from ixai.explainer.base import BaseIncrementalFeatureImportance
+from ixai.explainer.base import BaseIncrementalFeatureImportance, _get_mean_model_output
 from ixai.imputer import MarginalImputer, BaseImputer
 from ixai.storage import IntervalStorage, BatchStorage
 from ixai.storage.base import BaseStorage
-from ixai.utils.validators.loss import validate_loss_function
+from ixai.utils.validators import validate_loss_function, validate_model_function
 
 __all__ = [
     "IncrementalSage",
@@ -115,6 +115,7 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
             self,
             x_i: dict,
             y_i: Any,
+            n_inner_samples: Optional[int] = None,
             update_storage: bool = True
     ) -> dict[str, float]:
         """Explain one observation (x_i, y_i).
@@ -123,6 +124,8 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
             x_i (dict[str, Any]): The input features of the current observation as a dict of feature names to feature
                 values.
             y_i (Any): Target label of the current observation.
+            n_inner_samples (int, optional): Number of model evaluation per feature for the current explanation step
+                (observation). Defaults to `None`.
             update_storage (bool): Flag if the underlying incremental data storage mechanism is to be updated with the
                 new observation (`True`) or not (`False`). Defaults to `True`.
 
@@ -130,27 +133,33 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
             (dict[str, float]): The current SAGE feature importance scores.
         """
         if self.seen_samples >= 1:
+            if n_inner_samples is None:
+                n_inner_samples = self.n_inner_samples
             permutation_chain = np.random.permutation(self.feature_names)
-            y_i_pred = self._model_function(x_i)[0]
+            y_i_pred = self._model_function(x_i)
             model_loss = self._loss_function(y_i, y_i_pred)
             self._model_loss_tracker.update(model_loss)
             self.marginal_prediction = self._marginal_prediction_tracker.update(y_i_pred).get_normalized()
             sample_loss = self._loss_function(y_i, self.marginal_prediction)
             self._marginal_loss_tracker.update(sample_loss)
             features_not_in_S = set(self.feature_names)
+            marginal_contributions = {}
             for feature in permutation_chain:
                 features_not_in_S.remove(feature)
                 predictions = self._imputer.impute(
                     feature_subset=features_not_in_S,
                     x_i=x_i,
-                    n_samples=self.n_inner_samples
+                    n_samples=n_inner_samples
                 )
-                y = np.mean(np.asarray(predictions), axis=0)[0]
+                y = _get_mean_model_output(predictions)
                 feature_loss = self._loss_function(y_i, y)
                 marginal_contribution = sample_loss - feature_loss
                 sample_loss = feature_loss
-                self._importance_trackers[feature].update(marginal_contribution)
-                self._variance_trackers[feature].update((marginal_contribution - self.importance_values[feature])**2)
+                marginal_contributions[feature] = marginal_contribution
+            self._importance_trackers.update(marginal_contributions)
+            variances = {feature: (marginal_contributions[feature] - self.importance_values[feature])**2
+                         for feature in self.feature_names}
+            self._variance_trackers.update(variances)
         self.seen_samples += 1
         if update_storage:
             self._storage.update(x_i, y_i)
@@ -191,8 +200,8 @@ class BatchSage:
         """
         self.feature_names = feature_names
         self.n_inner_samples = n_inner_samples
-        self._model_function = model_function
-        self._loss_function = validate_loss_function(loss_function, model_function)
+        self._model_function = validate_model_function(model_function)
+        self._loss_function = validate_loss_function(loss_function)
         self._storage: BaseStorage = storage
         if self._storage is None:
             self._storage = BatchStorage(store_targets=True)
@@ -218,10 +227,14 @@ class BatchSage:
             self,
             x_data: list[dict],
             y_data: list[Any],
+            n_inner_samples: Optional[int] = None
     ) -> dict[str, float]:
+        if n_inner_samples is None:
+            n_inner_samples = self.n_inner_samples
         sage_values = {feature: 0. for feature in self.feature_names}
         n_data = len(x_data)
-        marginal_prediction = sum(self._model_function(x_data)) / n_data
+        all_predictions = self._model_function(x_data)
+        marginal_prediction = _get_mean_model_output(all_predictions)
         for n, (x_i, y_i) in tqdm(enumerate(zip(x_data, y_data), start=1), total=n_data):
             permutation_chain = np.random.permutation(self.feature_names)
             loss_previous = self._loss_function(y_true=y_i, y_prediction=marginal_prediction)
@@ -231,9 +244,9 @@ class BatchSage:
                 predictions = self._imputer.impute(
                     feature_subset=features_not_in_S,
                     x_i=x_i,
-                    n_samples=self.n_inner_samples
+                    n_samples=n_inner_samples
                 )
-                y = np.mean(np.asarray(predictions), axis=0)[0]
+                y = _get_mean_model_output(predictions)
                 feature_loss = self._loss_function(y_true=y_i, y_prediction=y)
                 marginal_contribution = loss_previous - feature_loss
                 sage_values[feature] += marginal_contribution
@@ -249,19 +262,20 @@ class BatchSage:
     ) -> dict[str, float]:
         sage_values = {feature: 0. for feature in self.feature_names}
         n_data = len(x_data)
-        marginal_prediction = sum(self._model_function(x_data)) / n_data
+        all_predictions = self._model_function(x_data)
+        marginal_prediction = _get_mean_model_output(all_predictions)
         for n, (x_i, y_i) in tqdm(enumerate(zip(x_data, y_data), start=1), total=n_data):
             permutation_chain = np.random.permutation(self.feature_names)
             x_S = {}
             loss_previous = self._loss_function(y_true=y_i, y_prediction=marginal_prediction)
             for feature in permutation_chain:
                 x_S[feature] = x_i[feature]
-                y = 0
+                predictions = []
                 for k in range(1, self.n_inner_samples + 1):
                     x_marginal = x_data[random.randint(0, n_data - 1)]
                     x_marginal = {**x_marginal, **x_S}
-                    y += self._model_function(x_marginal)[0]
-                y /= k
+                    predictions.append(self._model_function(x_marginal))
+                y = _get_mean_model_output(predictions)
                 feature_loss = self._loss_function(y_true=y_i, y_prediction=y)
                 marginal_contribution = loss_previous - feature_loss
                 sage_values[feature] += marginal_contribution
@@ -286,7 +300,7 @@ class IntervalSage(BatchSage):
 
         if storage is None:
             storage = IntervalStorage(store_targets=True, size=interval_length)
-        assert isinstance(storage, IntervalStorage), f"Only 'IntervalStorage' allowed not {type(storage)}."
+        assert isinstance(storage, IntervalStorage), f"Only 'IntervalStorage' expected not {type(storage)}."
 
         if imputer is None:
             imputer = MarginalImputer(model_function=model_function, sampling_strategy='joint', storage_object=storage)

@@ -1,16 +1,14 @@
 """
 This module contains River Model Wrappers to turn the output of river models into lists or arrays.
 """
-
-import copy
 import typing
 
-import numpy as np
+from river.metrics.base import Metric
 
 from ixai.utils.wrappers.base import Wrapper
 
 
-class RiverPredictionFunctionWrapper(Wrapper):
+class RiverWrapper(Wrapper):
     """Wrapper for river prediction functions.
 
     This wrapper turns any prediction function ouput into an iterable (list or np.ndarray) output.
@@ -19,38 +17,72 @@ class RiverPredictionFunctionWrapper(Wrapper):
         Basic usage:
         >>> from river.ensemble import AdaptiveRandomForestClassifier
         >>> model = AdaptiveRandomForestClassifier()
-        >>> model_function = RiverPredictionFunctionWrapper(model.predict_one)
+        >>> model_function = RiverWrapper(model.predict_one)
 
         For classifiers returning probas:
-        >>> model_function = RiverPredictionFunctionWrapper(model.predict_proba_one)
+        >>> model_function = RiverWrapper(model.predict_proba_one)
     """
 
-    def __init__(self, river_predict_function: typing.Callable):
-        self._river_predict_function = river_predict_function
-        self._max_labels = 1
-        self._seen_labels = {0: 0, 1: 1, False: 0, True: 1}
+    def __init__(self, prediction_function: typing.Callable):
+        super().__init__(prediction_function, feature_names=None)
+        self._seen_labels = set()
 
-    def _reduce_dict(self, y_prediction):
-        """Transforms a prediction output into a list if it is a dictionary."""
-        if not isinstance(y_prediction, dict):
-            return np.asarray([y_prediction])
-        self._max_labels = max(self._max_labels, max(y_prediction))
-        y_arr = np.zeros(shape=self._max_labels + 1)
-        for key, value in y_prediction.items():
-            y_arr[self._seen_labels[key]] = value
-            if key not in self._seen_labels.keys():
-                self._seen_labels[key] = self._max_labels + 1
-                self._max_labels += 1
-        return y_arr
+    def _extend_dict(self, y_prediction):
+        """Transforms a prediction output into a dict of outputs."""
+        if isinstance(y_prediction, dict):
+            return y_prediction  # TODO dicts[str, str] as y_prediction can break this
+        try:
+            return {self.default_label: float(y_prediction)}
+        except ValueError:  # y_prediction is str
+            self._seen_labels.add(y_prediction)
+            output = {label: 0. for label in self._seen_labels}
+            output[y_prediction] = 1.
+            return output
 
-    def __call__(self, x: typing.Union[typing.List[dict], dict]):
+    def __call__(self, x: typing.Union[typing.List[dict], dict]) -> typing.Union[dict, typing.List[dict]]:
         """Runs the model and transforms the output into a list or ndarray.
 
         Args:
             x (Union[list, dict]): Input instance as a dictionary of feature value pairs or a list of dictionaries.
         """
-        x_input = copy.copy(x)
-        if isinstance(x_input, dict):
-            x_input = [x_input]
-        predictions = [self._reduce_dict(self._river_predict_function(x_i)) for x_i in x_input]
-        return predictions
+        if isinstance(x, dict):
+            return self._extend_dict(self._prediction_function(x))
+        return [self._extend_dict(self._prediction_function(x_i)) for x_i in x]
+
+
+class RiverMetricToLossFunction:
+    """Wrapper that transforms a river.metrics.base.Metric into a loss function.
+
+    This Wrapper turns metrics that expect a single value as predictions (e.g. river.metrics.MAE, or
+    river.metrics.Accuracy) or metrics that expect a dictionary as predictions (e.g. river.metrics.CrossEntropy) into
+    a similar interface.
+    """
+
+    def __init__(self, river_metric: "Metric", dict_input_metric: bool = False):
+        """
+        Args:
+            river_metric ("Metric"): The river metric to be used as a loss function.
+            dict_input_metric (bool): Flag if the metric expects dictionary (`True`) or single value (`False`) inputs.
+                Defaults to `False` and expects single values.
+        """
+        self._river_metric = river_metric
+        self._sign = 1.
+        if hasattr(self._river_metric, "bigger_is_better") and self._river_metric.bigger_is_better:
+            self._sign = -1.
+        self._dict_input_metric = dict_input_metric
+
+    def __call__(self, y_true, y_prediction: dict):
+        """Calculates the loss given for a single prediction given its true (expected) value.
+
+        Args:
+            y_true (Any): The true labels.
+            y_prediction (dict): The predicted values.
+
+        Returns:
+            The loss value given the true and predicted labels.
+        """
+        if not self._dict_input_metric:
+            y_prediction = y_prediction.get('output', 0)
+        loss_i = self._river_metric.update(y_true=y_true, y_pred=y_prediction).get()
+        self._river_metric.revert(y_true=y_true, y_pred=y_prediction)
+        return loss_i * self._sign

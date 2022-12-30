@@ -12,6 +12,12 @@ class IntervalStorage(BaseStorage):
             size: int,
             store_targets: bool = True
     ):
+        """
+        Args:
+            size (int): The length of the interval for which data points should be stored.
+            store_targets (bool): Flag if the target values should be stored (`True`) or not (`False`). Defaults to
+                `True`.
+        """
         self.size = size
         self.store_targets = store_targets
         self._storage_x = deque()
