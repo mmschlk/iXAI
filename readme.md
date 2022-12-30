@@ -5,7 +5,7 @@
   </a>
 </p>
 
-# Increment Explain 
+# iXAI: Incremental Explainable Artificial Intelligence
 
 This is the first iteration of our incremental explainer package.
 
