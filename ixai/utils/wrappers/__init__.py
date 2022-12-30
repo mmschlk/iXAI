@@ -5,11 +5,13 @@ Note: To decrease the dependency count the required wrappers should be imported 
 """
 
 from .sklearn import SklearnWrapper
-from .river import RiverPredictionFunctionWrapper
-from .torch import TorchSupervisedLearningWrapper
+from .river import RiverWrapper, RiverMetricToLossFunction
+from .torch import TorchSupervisedLearningWrapper, TorchWrapper
 
 __all__ = [
+    "TorchWrapper",
     "TorchSupervisedLearningWrapper",
-    "RiverPredictionFunctionWrapper",
-    "SklearnWrapper"
+    "RiverWrapper",
+    "SklearnWrapper",
+    "RiverMetricToLossFunction"
 ]

@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # main training loop data_x and data_y needs to be pd.DataFrames and / or pd.Series
     for n, (x_i, y_i) in enumerate(iter_pandas(data_x, data_y), start=1):
-        y_i_pred = model_function(x_i)[0][0]
+        y_i_pred = model_function(x_i)['output']
         training_metric.update(y_true=y_i, y_pred=y_i_pred)
 
         # sage inc

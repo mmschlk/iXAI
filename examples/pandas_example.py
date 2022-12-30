@@ -13,7 +13,7 @@ from ixai.explainer import IncrementalPFI
 from ixai.explainer.sage import IncrementalSage, IntervalSage
 from ixai.imputer import MarginalImputer
 from ixai.storage import GeometricReservoirStorage
-from ixai.utils.wrappers import RiverPredictionFunctionWrapper
+from ixai.utils.wrappers import RiverWrapper
 
 if __name__ == "__main__":
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     # model
     model = AdaptiveRandomForestRegressor(n_models=15)  # most important hyperparameter is n_models
     model = compose.Pipeline(preprocessing.StandardScaler(), model)
-    model_function = RiverPredictionFunctionWrapper(model.predict_one)
+    model_function = RiverWrapper(model.predict_one)
 
     # performance metric and loss
     loss_metric = MSE()  # real metric can be everything from river.metrics used for explanations

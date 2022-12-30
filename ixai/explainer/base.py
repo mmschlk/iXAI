@@ -71,7 +71,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
             smoothing_alpha: typing.Optional[float] = None
     ):
         super().__init__(model_function, feature_names)
-        self._loss_function = validate_loss_function(loss_function, self._model_function)
+        self._loss_function = validate_loss_function(loss_function)
 
         self._smoothing_alpha = 0.001 if smoothing_alpha is None else smoothing_alpha
         if dynamic_setting:
@@ -82,11 +82,9 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
             base_tracker = WelfordTracker()
         self._marginal_loss_tracker: Tracker = copy.deepcopy(base_tracker)
         self._model_loss_tracker: Tracker = copy.deepcopy(base_tracker)
-        self._marginal_prediction_tracker: Tracker = MultiValueTracker(base_tracker=copy.deepcopy(base_tracker))
-        self._importance_trackers: dict[str, Tracker] = {
-            feature_name: copy.deepcopy(base_tracker) for feature_name in feature_names}
-        self._variance_trackers: dict[str, Tracker] = {
-            feature_name: copy.deepcopy(base_tracker) for feature_name in feature_names}
+        self._marginal_prediction_tracker: MultiValueTracker = MultiValueTracker(copy.deepcopy(base_tracker))
+        self._importance_trackers: MultiValueTracker = MultiValueTracker(copy.deepcopy(base_tracker))
+        self._variance_trackers: MultiValueTracker = MultiValueTracker(copy.deepcopy(base_tracker))
         self._storage: BaseStorage = storage
         if self._storage is None:
             if dynamic_setting:
@@ -104,13 +102,12 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
     @property
     def importance_values(self):
         """Incremental Importance Values property."""
-        return {feature_name: float(self._importance_trackers[feature_name].tracked_value)
-                for feature_name in self.feature_names}
+        return self._importance_trackers.get()
 
     @property
     def variances(self):
         """Incremental Variances values property."""
-        return {feature_name: self._variance_trackers[feature_name].get() for feature_name in self.feature_names}
+        return self._variance_trackers.get()
 
     def get_normalized_importance_values(self, mode: str = 'sum') -> dict[str, float]:
         """Normalizes the importance scores.
@@ -152,8 +149,27 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
         elif mode == 'sum':
             factor = sum(importance_values_list)
         else:
-            raise NotImplementedError(f"mode must be either 'sum', or 'delta' not '{mode}'")
+            raise NotImplementedError(f"The mode must be either 'sum', or 'delta' not '{mode}'.")
         try:
             return {feature: importance_value / factor for feature, importance_value in importance_values.items()}
         except ZeroDivisionError:
             return {feature: 0.0 for feature, importance_value in importance_values.items()}
+
+    def update_storage(self, x_i: dict, y_i: typing.Optional[typing.Any] = None):
+        """Manually updates the data storage with the given observation."""
+        self._storage.update(x=x_i, y=y_i)
+
+
+def _get_mean_model_output(model_outputs: typing.List[typing.Dict]) -> dict:
+    """Calculates the mean values of a list of dict model outputs.
+
+    Args:
+        model_outputs (list[dict]): List of model outputs.
+
+    Returns:
+        (dict) The mean model output, where every label value is the average of all individual label values.
+    """
+    all_labels = {label for model_output in model_outputs for label in model_output}
+    mean_output = {label: sum([output.get(label, 0) for output in model_outputs]) / len(model_outputs)
+                   for label in all_labels}
+    return mean_output

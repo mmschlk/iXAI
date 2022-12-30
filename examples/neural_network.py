@@ -1,4 +1,5 @@
 import river.metrics
+import torch
 from river.utils import Rolling
 from river import preprocessing, compose
 from river.datasets import Elec2
@@ -11,8 +12,7 @@ from ixai.explainer import IncrementalPFI
 from ixai.explainer.sage import IncrementalSage, IntervalSage
 from ixai.imputer import MarginalImputer
 from ixai.storage import GeometricReservoirStorage
-from ixai.utils.wrappers.river import RiverPredictionFunctionWrapper
-from ixai.utils.wrappers.torch import TorchSupervisedLearningWrapper
+from ixai.utils.wrappers.torch import TorchSupervisedLearningWrapper, TorchWrapper
 
 N_SAMPLES = 10_000
 
@@ -34,7 +34,7 @@ class Net(nn.Module):
 if __name__ == "__main__":
 
     # Get Data ---------------------------------------------------------------------------------------------------------
-    stream = Elec2()#Agrawal(classification_function=1, seed=42)
+    stream = Elec2()
     feature_names = list([x_0 for x_0, _ in stream.take(1)][0].keys())
 
     N_INPUT = len(feature_names)
@@ -43,13 +43,18 @@ if __name__ == "__main__":
     network_loss_function = nn.CrossEntropyLoss()
     network_optimizer = optim.SGD(network.parameters(), lr=0.001, momentum=0.9)
 
-    loss_metric = river.metrics.Accuracy()
+    loss_metric = river.metrics.CrossEntropy()
     training_metric = Rolling(river.metrics.Accuracy(), window_size=1000)
 
     model = TorchSupervisedLearningWrapper(
         model=network, loss_function=network_loss_function, optimizer=network_optimizer, n_classes=N_CLASSES)
-    model = compose.Pipeline(preprocessing.StandardScaler(), model)
-    model_function = RiverPredictionFunctionWrapper(model.predict_one)
+    scaler = preprocessing.StandardScaler()
+    model = compose.Pipeline(scaler, model)
+
+
+    def network_link_function(x):
+        return torch.softmax(network(x), dim=-1)
+    model_function = TorchWrapper(network_link_function)
 
     # Get imputer and explainers ---------------------------------------------------------------------------------------
     storage = GeometricReservoirStorage(
@@ -103,6 +108,10 @@ if __name__ == "__main__":
         # predicting
         y_i_pred = model.predict_one(x_i)
         training_metric.update(y_true=y_i, y_pred=y_i_pred)
+
+        # transforming for explanation's model function
+        x_i_transformed = scaler.transform_one(x_i)
+        _ = incremental_sage.explain_one(x_i_transformed, y_i)
 
         # sage inc
         _ = incremental_sage.explain_one(x_i, y_i)

@@ -18,22 +18,22 @@ class Tracker(abc.ABC):
         self.tracked_value = 0
         self.N = 0
 
-    def __repr__(self):
-        return f"{np.round(self.tracked_value, 2)}"
-
-    def __call__(self, *args, **kwargs):
-        """Returns the current tracked value"""
-        return self.tracked_value
-
-    def get(self):
-        """Returns the current tracked value"""
-        return self.tracked_value
-
     @abc.abstractmethod
     def update(self, *args, **kwargs) -> "Tracker":
         """Updates the tracker with a new value or values."""
         raise NotImplementedError
 
+    def __repr__(self):
+        return f"{np.round(self.tracked_value, 2)}"
+
+    def __call__(self, *args, **kwargs):
+        """Returns the current tracked value."""
+        return self.tracked_value
+
+    def get(self):
+        """Returns the current tracked value."""
+        return self()
+
     def get_normalized(self):
-        """Default returns the current tracked value"""
+        """Default normalization which only returns the current tracked value."""
         return self.get()

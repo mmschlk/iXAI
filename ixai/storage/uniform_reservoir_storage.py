@@ -45,7 +45,7 @@ class UniformReservoirStorage(ReservoirStorage):
 
         Args:
             x (dict): Current observation's features.
-            y (Optional): Current observation's label. Defaults to None.
+            y (Any, optional): Current observation's label. Defaults to None.
         """
         self.stored_samples += 1
         if self.stored_samples <= self.size:

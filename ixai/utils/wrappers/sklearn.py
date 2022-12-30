@@ -1,6 +1,5 @@
 import typing
-
-import numpy as np
+import warnings
 
 from ixai.utils.wrappers.base import Wrapper
 
@@ -20,23 +19,27 @@ class SklearnWrapper(Wrapper):
         For classifiers returning probas:
         >>> model_function = SklearnWrapper(model.predict_proba)
 
+        If the dict-inputs may be in a different orderings
+        >>> feature_orderings: list = ['feature_1', 'feature_2', 'feature_3']
+        >>> model_function = SklearnWrapper(model.predict, feature_names=feature_orderings)
+
     Note:
         If the sklearn model is trained with access to the feature names (e.g. trained on a pandas DataFrame) it will
-        raise a warning, which can be suppressed.
+        usually raise a warning, if unnamed feature values are provided (e.g. in the form of a np.ndarray). Since
+        instantiating a pandas DataFrame for each input is computationally more expensive, the specific warning is
+        manually suppressed in this Wrapper.
     """
 
-    def __init__(self, prediction_function: typing.Callable):
-        self.prediction_function = prediction_function
+    def __init__(self, prediction_function: typing.Callable, feature_names: typing.Optional[list] = None):
+        super().__init__(prediction_function, feature_names)
 
-    def __call__(self, x: typing.Union[dict, typing.Sequence]):
-        if isinstance(x, dict):
-            x_list = [list(x.values())]
-            y_pred = self.prediction_function(x_list)
-            if len(y_pred.shape) == 1:
-                y_pred = np.asarray([y_pred])
-        else:
-            y_pred = np.empty(shape=len(x))
-            for i in range(len(x)):
-                x_list = [list(x[i].values())]
-                y_pred[i] = self.prediction_function(x_list)
-        return y_pred
+    def __call__(self, x: typing.Union[typing.List[dict], dict]) -> typing.Union[dict, typing.List[dict]]:
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="X does not have valid feature names, but")
+            if isinstance(x, dict):
+                x_input = self.convert_1d_input_to_arr(x)
+                return self.convert_arr_output_to_dict(self._prediction_function(x_input))
+            x_input = self.convert_2d_input_to_arr(x)
+            y_predictions = self._prediction_function(x_input)
+            y_prediction = [self.convert_arr_output_to_dict(y_predictions[i]) for i in range(len(y_predictions))]
+            return y_prediction
