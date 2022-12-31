@@ -1,6 +1,6 @@
 from .base import BaseStorage
 from collections import deque
-from typing import Dict, Optional, Any
+from typing import Optional, Any
 
 
 class IntervalStorage(BaseStorage):
@@ -23,7 +23,7 @@ class IntervalStorage(BaseStorage):
         self._storage_x = deque()
         self._storage_y = deque()
 
-    def update(self, x: Dict, y: Optional[Any] = None):
+    def update(self, x: dict, y: Optional[Any] = None):
         if len(self._storage_x) < self.size:
             self._storage_x.append(x)
             if self.store_targets:

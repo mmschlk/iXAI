@@ -1,5 +1,5 @@
 import copy
-from typing import Optional, Union, Sequence
+from typing import Optional, Union, Sequence, Tuple, Dict, List
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,7 +9,7 @@ from ixai.visualization.color import color_list_generator, get_color_with_genera
 
 def _validate_y_x_data(y_data: Union[dict, Sequence],
                        x_data: Optional[Union[dict, Sequence]] = None,
-                       line_names: Optional[list[str]] = None) -> tuple[dict, dict, list[str]]:
+                       line_names: Optional[List[str]] = None) -> Tuple[dict, dict, List[str]]:
     if isinstance(y_data, dict):
         y_keys = set(y_data.keys())
     else:
@@ -24,7 +24,6 @@ def _validate_y_x_data(y_data: Union[dict, Sequence],
             if line_names is None:
                 line_names = ['X' + str(i) for i in range(len(y_data_facet))]
             y_data[y_key] = pd.DataFrame(y_data_facet, columns=line_names)
-
 
     if x_data is not None and isinstance(x_data, dict):
         x_keys = list(x_data.keys())
@@ -44,7 +43,7 @@ def _validate_y_x_data(y_data: Union[dict, Sequence],
 
 def _validate_std(std: Optional[dict],
                   y_data: Optional[dict],
-                  line_names: list[str]) -> Optional[dict]:
+                  line_names: List[str]) -> Optional[dict]:
     if std is None:
         return None
     if not isinstance(std, dict):
@@ -68,28 +67,28 @@ def plot_multi_line_graph(
         *,
         x_data: Optional[Union[dict, Sequence]] = None,
         line_names: Optional[Union[dict, Sequence]] = None,
-        names_to_highlight: Optional[list[str]] = None,
-        facet_not_to_highlight: Optional[list[str]] = None,
-        line_styles: Optional[dict[str, str]] = None,
+        names_to_highlight: Optional[List[str]] = None,
+        facet_not_to_highlight: Optional[List[str]] = None,
+        line_styles: Optional[Dict[str, str]] = None,
         std: Optional[Union[dict, Sequence]] = None,
         title: Optional[str] = None,
         y_label: Optional[str] = None,
         x_label: Optional[str] = None,
-        y_ticks: Optional[list[Union[int, float]]] = None,
-        x_ticks: Optional[list[Union[int, float]]] = None,
+        y_ticks: Optional[List[Union[int, float]]] = None,
+        x_ticks: Optional[List[Union[int, float]]] = None,
         y_min: Optional[Union[int, float]] = None,
         y_max: Optional[Union[int, float]] = None,
         x_min: Optional[Union[int, float]] = None,
         x_max: Optional[Union[int, float]] = None,
         legend_style: Optional[dict] = None,
-        secondary_legends: Optional[list[dict[str, dict]]] = None,
+        secondary_legends: Optional[List[Dict[str, dict]]] = None,
         base_color: Optional[str] = None,
-        color_list: Optional[list[str]] = None,
-        h_lines: Optional[list[dict]] = None,
-        v_lines: Optional[list[dict]] = None,
-        markevery: Optional[dict[str, int]] = None,
+        color_list: Optional[List[str]] = None,
+        h_lines: Optional[List[dict]] = None,
+        v_lines: Optional[List[dict]] = None,
+        markevery: Optional[Dict[str, int]] = None,
         tick_right: bool = False,
-        fill_between_props: Optional[list[dict]] = None
+        fill_between_props: Optional[List[dict]] = None
 ) -> plt.axis:
 
     if facet_not_to_highlight is None:
@@ -250,15 +249,15 @@ def plot_multi_line_graph(
 
 
 def stacked_plots(
-        axes_function: Union[callable, list[callable]],
-        data: dict[int, dict[int, dict]],  # TODO think about indexing
+        axes_function: Union[callable, List[callable]],
+        data: Dict[int, Dict[int, dict]],  # TODO think about indexing
         ncols: int = 1,
         nrows: int = 1,
-        height_ratios: Optional[list[float]] = None,
-        width_ratios: Optional[list[float]] = None,
+        height_ratios: Optional[List[float]] = None,
+        width_ratios: Optional[List[float]] = None,
         figsize=(10, 5),
         title: Optional[str] = None
-) -> tuple[plt.figure, list[plt.axis]]:
+) -> Tuple[plt.figure, List[plt.axis]]:
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, sharex='col', sharey='row',
                              figsize=figsize,
                              gridspec_kw={'height_ratios': height_ratios,

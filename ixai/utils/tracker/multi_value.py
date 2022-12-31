@@ -21,7 +21,10 @@ class MultiValueTracker(Tracker):
         self._tracked_keys: typing.Set = set()
         self._base_tracker = copy.deepcopy(base_tracker)
 
-    def update(self, values: dict[typing.Any, typing.Union[int, float]]) -> "Tracker":
+    def update(
+            self,
+            values: typing.Dict[typing.Any, typing.Union[int, float]]
+    ) -> "Tracker":
         """Adds one value for tracked object to the tracker.
 
         Note:
