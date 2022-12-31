@@ -36,7 +36,7 @@ class TorchWrapper(Wrapper):
 
     def __init__(
             self,
-            link_function: typing.Union[torch.nn.Module, typing.Callable],
+            link_function: typing.Union["Module", typing.Callable],
             feature_names: typing.Optional[list] = None,
             device: str = 'cpu'
     ):

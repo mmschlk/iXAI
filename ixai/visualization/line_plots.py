@@ -25,7 +25,6 @@ def _validate_y_x_data(y_data: Union[dict, Sequence],
                 line_names = ['X' + str(i) for i in range(len(y_data_facet))]
             y_data[y_key] = pd.DataFrame(y_data_facet, columns=line_names)
 
-
     if x_data is not None and isinstance(x_data, dict):
         x_keys = list(x_data.keys())
     else:
