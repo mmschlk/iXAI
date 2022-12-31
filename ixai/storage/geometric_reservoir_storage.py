@@ -1,5 +1,5 @@
 from .reservoir_storage import ReservoirStorage
-from typing import Dict, Optional, Any
+from typing import Optional, Any
 import random
 
 
@@ -23,7 +23,7 @@ class GeometricReservoirStorage(ReservoirStorage):
         else:
             self.constant_probability = 1 / self.size
 
-    def update(self, x: Dict, y: Optional[Any] = None):
+    def update(self, x: dict, y: Optional[Any] = None):
         if len(self._storage_x) < self.size:
             self._storage_x.append(x)
             if self.store_targets:

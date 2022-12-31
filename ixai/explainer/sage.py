@@ -7,7 +7,7 @@ This module gathers SAGE Explanation Methods
 #          Rohit Jagtani
 
 import random
-from typing import Optional, Callable, Any, Union
+from typing import Optional, Callable, Any, Union, List
 
 from river.metrics.base import Metric
 import numpy as np
@@ -117,11 +117,11 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
             y_i: Any,
             n_inner_samples: Optional[int] = None,
             update_storage: bool = True
-    ) -> dict[str, float]:
+    ) -> dict:
         """Explain one observation (x_i, y_i).
 
         Args:
-            x_i (dict[str, Any]): The input features of the current observation as a dict of feature names to feature
+            x_i (dict): The input features of the current observation as a dict of feature names to feature
                 values.
             y_i (Any): Target label of the current observation.
             n_inner_samples (int, optional): Number of model evaluation per feature for the current explanation step
@@ -130,7 +130,7 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
                 new observation (`True`) or not (`False`). Defaults to `True`.
 
         Returns:
-            (dict[str, float]): The current SAGE feature importance scores.
+            (dict): The current SAGE feature importance scores.
         """
         if self.seen_samples >= 1:
             if n_inner_samples is None:
@@ -225,10 +225,10 @@ class BatchSage:
 
     def explain_many(
             self,
-            x_data: list[dict],
-            y_data: list[Any],
+            x_data: List[dict],
+            y_data: List[Any],
             n_inner_samples: Optional[int] = None
-    ) -> dict[str, float]:
+    ) -> dict:
         if n_inner_samples is None:
             n_inner_samples = self.n_inner_samples
         sage_values = {feature: 0. for feature in self.feature_names}
@@ -257,9 +257,9 @@ class BatchSage:
 
     def explain_many_original(
             self,
-            x_data: list[dict[str, Any]],
-            y_data: list[Any],
-    ) -> dict[str, float]:
+            x_data: List[dict],
+            y_data: List[Any],
+    ) -> dict:
         sage_values = {feature: 0. for feature in self.feature_names}
         n_data = len(x_data)
         all_predictions = self._model_function(x_data)
@@ -318,11 +318,11 @@ class IntervalSage(BatchSage):
 
     def explain_one(
             self,
-            x_i: dict[str, Any],
+            x_i: dict,
             y_i: Any,
             sub_sample_size: Optional[int] = None,
             force_explain: bool = False
-    ) -> dict[str, float]:
+    ) -> dict:
         self._storage.update(x=x_i, y=y_i)
         self.seen_samples += 1
         if not force_explain and self.seen_samples % self._interval_length != 0:

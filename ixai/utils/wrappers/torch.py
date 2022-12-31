@@ -86,7 +86,7 @@ class TorchSupervisedLearningWrapper(Wrapper):
     This wrapper turns any prediction function output into an iterable (list or np.ndarray) output.
     """
 
-    def __init__(self, model, optimizer, loss_function, n_classes: int = 1, class_labels: list[str] = None):
+    def __init__(self, model, optimizer, loss_function, n_classes: int = 1, class_labels: list = None):
         super().__init__(prediction_function=None, feature_names=None)
         self.model = model
         self.optimizer = optimizer

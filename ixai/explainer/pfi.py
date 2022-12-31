@@ -2,11 +2,11 @@
 This module gathers PFI Explanation Methods
 """
 
-# Authors: Maximilian Muschalik <maximilian.muschalik@lmu.de>
+# Authors: Maximilian Muschalik <maximilian.muschalik@ifi.lmu.de>
 #          Fabian Fumagalli <ffumagalli@techfak.uni-bielefeld.de>
 #          Rohit Jagtani
 
-from typing import Optional, Union, Callable
+from typing import Optional, Union, Callable, List, Any
 from .base import BaseIncrementalFeatureImportance
 import numpy as np
 from river.metrics.base import Metric
@@ -32,7 +32,7 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
             self,
             model_function: Callable,
             loss_function: Union[Callable, Metric],
-            feature_names: list[str],
+            feature_names: list,
             storage: Optional[BaseStorage] = None,
             imputer: Optional[BaseImputer] = None,
             n_inner_samples: int = 5,
@@ -79,15 +79,15 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
 
     def explain_one(
             self,
-            x_i,
-            y_i,
+            x_i: dict,
+            y_i: Any,
             n_inner_samples: Optional[int] = None,
             update_storage: bool = True
-    ):
+    ) -> dict:
         """Explain one observation (x_i, y_i).
 
         Args:
-            x_i (dict[str, Any]): The input features of the current observation as a dict of feature names to feature
+            x_i (dict): The input features of the current observation as a dict of feature names to feature
                 values.
             y_i (Any): Target label of the current observation.
             update_storage (bool): Flag if the underlying incremental data storage mechanism is to be updated with the
@@ -99,7 +99,7 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
                 data storage mechanism. Defaults to `True`.
 
         Returns:
-            (dict[Any, float]): The current PFI feature importance scores.
+            (dict): The current PFI feature importance scores.
         """
         if self.seen_samples >= 1:
             if n_inner_samples is None:

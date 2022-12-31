@@ -29,12 +29,16 @@ def get_all_tree_paths(node, walked_path: str = '', paths=None) -> List[str]:
     return paths
 
 
-def walk_through_tree(node, x_i, until_leaf=True) -> typing.Iterable[typing.Union["Branch", "Leaf"]]:
+def walk_through_tree(
+        node: typing.Union["Branch", "Leaf"],
+        x_i: dict,
+        until_leaf: bool = True
+) -> typing.Iterable[typing.Union["Branch", "Leaf"]]:
     """Traverses a decision tree given a data point, and a starting node.
 
     Args:
         node: Target as float or integer
-        x_i (dict[str, Any]): Data point as Dicts.
+        x_i (dict): Data point as Dicts.
         until_leaf (bool): Flag weather to traverse the tree until a leaf node (``True``) or
             just the next node (``False``).
 
@@ -101,15 +105,15 @@ class TreeStorage(BaseStorage):
         feature_names (list[str]): List of features stored.
         cat_feature_names (list[str]): List of categorical features stored.
         num_feature_names (list[str]): List of numerical features stored.
-        performances (dict[str, Union[R2, Accuracy]]): Dictionary of performance metrics per incremental decision tree
+        performances (dict[Any, Union[R2, Accuracy]]): Dictionary of performance metrics per incremental decision tree
             for each feature stored.
         data_reservoirs (dict[str, dict]): Dictionary of data reservoirs for each feature and leaf nodes.
     """
 
     def __init__(
             self,
-            cat_feature_names: List[str],
-            num_feature_names: List[str],
+            cat_feature_names: list,
+            num_feature_names: list,
             max_depth: int = 5,
             leaf_reservoir_length: int = 10,
             grace_period: int = 200,
@@ -206,7 +210,7 @@ class TreeStorage(BaseStorage):
             self._delete_outdated_reservoirs(feature_name, root_node)
         data_reservoir[leaf_id].update(x)
 
-    def __call__(self, feature_name: str) -> Tuple[Union[HoeffdingTreeRegressor, HoeffdingTreeClassifier], str]:
+    def __call__(self, feature_name: Any) -> Tuple[Union[HoeffdingTreeRegressor, HoeffdingTreeClassifier], str]:
         """Given a feature name, returns the associated data reservoirs.
 
         Args:

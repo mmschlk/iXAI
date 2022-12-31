@@ -27,7 +27,7 @@ class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
     Use derived classes instead.
 
     Attributes:
-        feature_names (list[str]): List of feature names that are explained.
+        feature_names (list[typing.Any]): List of feature names that are explained.
         number_of_features (int): Number of features that are explained.
         seen_samples (int): Number of instances observed.
     """
@@ -36,7 +36,7 @@ class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
     def __init__(
             self,
             model_function: typing.Callable,
-            feature_names: list[str]
+            feature_names: list
     ):
         """
         Args:
@@ -64,7 +64,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
             self,
             model_function,
             loss_function,
-            feature_names,
+            feature_names: list,
             storage: typing.Optional[BaseStorage] = None,
             imputer: typing.Optional[BaseImputer] = None,
             dynamic_setting: bool = False,
@@ -109,7 +109,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
         """Incremental Variances values property."""
         return self._variance_trackers.get()
 
-    def get_normalized_importance_values(self, mode: str = 'sum') -> dict[str, float]:
+    def get_normalized_importance_values(self, mode: str = 'sum') -> dict:
         """Normalizes the importance scores.
 
         Args:
@@ -119,7 +119,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
                 importance scores and the min of the importance scores.
 
         Returns:
-            (dict[str, float]): The normalized importance values.
+            (dict): The normalized importance values.
         """
         return self._normalize_importance_values(self.importance_values, mode=mode)
 
@@ -130,7 +130,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
             delta (float): The confidence parameter. Must be a value in the interval of ]0,1].
 
         Returns:
-            (dict[str, float]): The upper confidence bound around the point estimate of the importance values.
+            (dict): The upper confidence bound around the point estimate of the importance values.
                 This value needs to be added to the top and bottom of the point estimate.
         """
         assert 0 < delta <= 1., f"Delta must be float in the interval of ]0,1] and not {delta}."
@@ -142,7 +142,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
             for feature_name in self.feature_names}
 
     @staticmethod
-    def _normalize_importance_values(importance_values: dict[str, float], mode: str = 'sum') -> dict[str, float]:
+    def _normalize_importance_values(importance_values: dict, mode: str = 'sum') -> dict:
         importance_values_list = list(importance_values.values())
         if mode == 'delta':
             factor = max(importance_values_list) - min(importance_values_list)
@@ -160,7 +160,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
         self._storage.update(x=x_i, y=y_i)
 
 
-def _get_mean_model_output(model_outputs: typing.List[typing.Dict]) -> dict:
+def _get_mean_model_output(model_outputs: typing.List[dict]) -> dict:
     """Calculates the mean values of a list of dict model outputs.
 
     Args:

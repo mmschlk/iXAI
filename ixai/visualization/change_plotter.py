@@ -27,7 +27,7 @@ class ChangePlotter(BasePlotter):
 
     def update(
             self,
-            importance_values: dict[str, typing.Union[int, float]],
+            importance_values: dict,
     ):
         self.seen_timesteps += 1
         for feature_name, feature_value in importance_values.items():
@@ -38,9 +38,9 @@ class ChangePlotter(BasePlotter):
 
     def plot(
             self,
-            figsize: typing.Optional[tuple[int, int]] = None,
+            figsize: typing.Optional[typing.Tuple[int, int]] = None,
             save_name: typing.Optional[str] = None,
-            model_performances: typing.Optional[dict[str, typing.Sequence]] = None,
+            model_performances: typing.Optional[typing.Dict[typing.Any, typing.Sequence]] = None,
             performance_kw: typing.Optional[dict] = None,
             **plot_kw
     ) -> None:
