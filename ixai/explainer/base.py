@@ -75,8 +75,8 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
 
         self._smoothing_alpha = 0.001 if smoothing_alpha is None else smoothing_alpha
         if dynamic_setting:
-            assert 0. < smoothing_alpha <= 1., f"The smoothing parameter needs to be in the range" \ 
-                                               f" of ']0,1]' and not " \ 
+            assert 0. < smoothing_alpha <= 1., f"The smoothing parameter needs to be in the range" \
+                                               f" of ']0,1]' and not " \
                                                f"'{self._smoothing_alpha}'."
             base_tracker = ExponentialSmoothingTracker(alpha=self._smoothing_alpha)
         else:
