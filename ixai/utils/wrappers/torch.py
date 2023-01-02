@@ -15,11 +15,12 @@ class TorchSupervisedLearningWrapper(Wrapper):
     This wrapper turns any prediction function output into an iterable (list or np.ndarray) output.
     """
 
-    def __init__(self, model, optimizer, loss_function, n_classes: int = 1, class_labels: list[str] = None):
+    def __init__(self, model, optimizer, loss_function, task, n_classes: int = 1, class_labels: list[str] = None):
         self.model = model
         self.optimizer = optimizer
         self.loss_function = loss_function
         self._supervised = True
+        self.task = task
         self.n_classes = n_classes
         if class_labels is not None:
             self.n_classes = len(class_labels)
@@ -39,7 +40,11 @@ class TorchSupervisedLearningWrapper(Wrapper):
 
     def predict_one(self, x_i):
         x_tensor = self._dict_to_tensor(x_i)
-        return int(torch.argmax(self.model(x_tensor)))
+        if self.task == 'Regression':
+            pred = float(self.model(x_tensor))
+        else:
+            pred = int(torch.argmax(self.model(x_tensor)))
+        return pred
 
     def predict_proba_one(self, x_i):
         x_tensor = self._dict_to_tensor(x_i)
