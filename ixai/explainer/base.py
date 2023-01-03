@@ -1,15 +1,12 @@
 """
 This module gathers base Explanation Methods
 """
-
-# Authors: Maximilian Muschalik <maximilian.muschalik@lmu.de>
-#          Fabian Fumagalli <ffumagalli@techfak.uni-bielefeld.de>
-#          Rohit Jagtani
-
 import copy
 import math
 import abc
-import typing
+from typing import Union, Sequence, Dict, List, Callable, Any, Optional
+
+from river.metrics.base import Metric
 
 from ixai.imputer import BaseImputer, MarginalImputer
 from ixai.storage import GeometricReservoirStorage, UniformReservoirStorage
@@ -35,8 +32,8 @@ class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def __init__(
             self,
-            model_function: typing.Callable,
-            feature_names: list
+            model_function: Callable[[Any], Any],
+            feature_names: Sequence[Union[str, int, float]]
     ):
         """
         Args:
@@ -62,13 +59,13 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
     @abc.abstractmethod
     def __init__(
             self,
-            model_function,
-            loss_function,
-            feature_names: list,
-            storage: typing.Optional[BaseStorage] = None,
-            imputer: typing.Optional[BaseImputer] = None,
+            model_function: Callable[[Any], Any],
+            loss_function: Union[Metric, Callable[[Any, Dict], float]],
+            feature_names: Sequence[Union[str, int, float]],
+            storage: Optional[BaseStorage] = None,
+            imputer: Optional[BaseImputer] = None,
             dynamic_setting: bool = False,
-            smoothing_alpha: typing.Optional[float] = None
+            smoothing_alpha: Optional[float] = None
     ):
         super().__init__(model_function, feature_names)
         self._loss_function = validate_loss_function(loss_function)
@@ -157,12 +154,16 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
         except ZeroDivisionError:
             return {feature: 0.0 for feature, importance_value in importance_values.items()}
 
-    def update_storage(self, x_i: dict, y_i: typing.Optional[typing.Any] = None):
-        """Manually updates the data storage with the given observation."""
+    def update_storage(self, x_i: dict, y_i: Optional[Any] = None):
+        """Manually updates the data storage with the given observation.
+        Args:
+            x_i (dict): The input features of the current observation.
+            y_i (Any, optional): Target label of the current observation. Defaults to `None`
+        """
         self._storage.update(x=x_i, y=y_i)
 
 
-def _get_mean_model_output(model_outputs: typing.List[dict]) -> dict:
+def _get_mean_model_output(model_outputs: List[dict]) -> dict:
     """Calculates the mean values of a list of dict model outputs.
 
     Args:
