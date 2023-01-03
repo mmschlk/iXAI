@@ -1,6 +1,10 @@
-from .base import BaseStorage
+"""
+This module contains the IntervalStorage
+"""
 from collections import deque
 from typing import Optional, Any
+
+from .base import BaseStorage
 
 
 class IntervalStorage(BaseStorage):

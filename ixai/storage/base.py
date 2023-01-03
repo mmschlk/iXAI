@@ -1,4 +1,7 @@
-from typing import List, Dict, Optional, Any
+"""
+This module contains base storage objects
+"""
+from typing import List, Optional, Any
 from abc import abstractmethod, ABC
 
 
@@ -16,7 +19,6 @@ class BaseStorage(ABC):
     @abstractmethod
     def update(self, x: dict, y: Optional[Any]):
         """Given a data point, it updates the storage.
-
         Args:
             x: Features as Dict of feature names (keys) and feature values (values)
             y: Target as float or integer
