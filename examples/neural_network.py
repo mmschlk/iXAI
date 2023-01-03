@@ -47,7 +47,8 @@ if __name__ == "__main__":
     training_metric = Rolling(river.metrics.Accuracy(), window_size=1000)
 
     model = TorchSupervisedLearningWrapper(
-        model=network, loss_function=network_loss_function, optimizer=network_optimizer, n_classes=N_CLASSES)
+        model=network, loss_function=network_loss_function, optimizer=network_optimizer, n_classes=N_CLASSES,
+        task='Classification')
     scaler = preprocessing.StandardScaler()
     model = compose.Pipeline(scaler, model)
 
