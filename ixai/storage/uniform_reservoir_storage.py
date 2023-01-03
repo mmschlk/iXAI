@@ -1,8 +1,12 @@
+"""
+This module contains the UniformReservoirStorage.
+"""
+import random
+from typing import Optional, Any
+
 import numpy as np
 
 from .reservoir_storage import ReservoirStorage
-from typing import Optional, Any
-import random
 
 
 class UniformReservoirStorage(ReservoirStorage):
@@ -10,7 +14,8 @@ class UniformReservoirStorage(ReservoirStorage):
 
     Summarizes a data stream by keeping track of a fixed length reservoir of observations.
     Each past observation of the stream has an equal probability of being in the reservoir at
-    the current time. For more information we refer to https://en.wikipedia.org/wiki/Reservoir_sampling.
+    the current time.
+    For more information we refer to https://en.wikipedia.org/wiki/Reservoir_sampling.
 
     Attributes:
         stored_samples int: Number of samples observed in the stream.
@@ -30,7 +35,6 @@ class UniformReservoirStorage(ReservoirStorage):
             size=size,
             store_targets=store_targets
         )
-        super(ReservoirStorage, self).__init__()
         self.stored_samples: int = 0
         self._algo_wt = np.exp(np.log(random.random()) / self.size)
         self._algo_l_counter: int = (
@@ -54,9 +58,8 @@ class UniformReservoirStorage(ReservoirStorage):
                 self._storage_y.append(y)
         else:
             if self._algo_l_counter == self.stored_samples:
-                self._algo_l_counter += (np.floor
-                                        (np.log(random.random()) / np.log(
-                                            1 - self._algo_wt)) + 1)
+                self._algo_l_counter += (np.floor(
+                    np.log(random.random()) / np.log(1 - self._algo_wt)) + 1)
                 rand_idx = random.randrange(self.size)
                 self._storage_x[rand_idx] = x
                 if self.store_targets:

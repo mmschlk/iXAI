@@ -1,22 +1,17 @@
 """
 This module gathers PFI Explanation Methods
 """
+from typing import Optional, Union, Callable, Any
 
-# Authors: Maximilian Muschalik <maximilian.muschalik@ifi.lmu.de>
-#          Fabian Fumagalli <ffumagalli@techfak.uni-bielefeld.de>
-#          Rohit Jagtani
-
-from typing import Optional, Union, Callable, List, Any
-from .base import BaseIncrementalFeatureImportance
 import numpy as np
 from river.metrics.base import Metric
-from ..imputer import BaseImputer
-from ..storage.base import BaseStorage
+
+from ixai.imputer import BaseImputer
+from ixai.storage.base import BaseStorage
+from .base import BaseIncrementalFeatureImportance
 
 
-__all__ = [
-    "IncrementalPFI",
-]
+__all__ = ["IncrementalPFI"]
 
 
 class IncrementalPFI(BaseIncrementalFeatureImportance):
@@ -35,7 +30,7 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
             feature_names: list,
             storage: Optional[BaseStorage] = None,
             imputer: Optional[BaseImputer] = None,
-            n_inner_samples: int = 5,
+            n_inner_samples: int = 1,
             smoothing_alpha: float = 0.001,
             dynamic_setting: bool = True
     ):
@@ -66,7 +61,7 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
                 adaptive explanation) or a static modelling setting `False` (all observations contribute equally to the
                 final importance) is assumed. Defaults to `True`.
         """
-        super(IncrementalPFI, self).__init__(
+        super().__init__(
             model_function=model_function,
             loss_function=loss_function,
             feature_names=feature_names,

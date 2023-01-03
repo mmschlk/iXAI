@@ -1,7 +1,8 @@
+"""Test for trackers."""
 import pytest
 import numpy as np
 
-from ixai.utils.tracker import WelfordTracker, SlidingWindowTracker, MultiValueTracker, ExponentialSmoothingTracker
+from ixai.utils.tracker import WelfordTracker, ExponentialSmoothingTracker
 
 dummy_value_stream_1 = [i for i in range(1, 1001)]
 dummy_value_stream_2 = [0 for i in range(1, 1001)]

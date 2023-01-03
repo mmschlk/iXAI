@@ -14,7 +14,7 @@ N_SAMPLES = 10_000
 
 if __name__ == "__main__":
 
-    # Get Data ---------------------------------------------------------------------------------------------------------
+    # Get Data -------------------------------------------------------------------------------------
     stream = Agrawal(classification_function=1, seed=42)
     feature_names = list([x_0 for x_0, _ in stream.take(1)][0].keys())
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     model = AdaptiveRandomForestClassifier(n_models=15, max_depth=10, leaf_prediction='mc')
     model_function = RiverWrapper(model.predict_proba_one)
 
-    # Get imputer and explainers ---------------------------------------------------------------------------------------
+    # Get imputer and explainers -------------------------------------------------------------------
     storage = GeometricReservoirStorage(
         size=200,
         store_targets=False
