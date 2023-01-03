@@ -1,14 +1,14 @@
 """
 This module gathers PFI Explanation Methods
 """
-from typing import Optional, Union, Callable, Any
+from typing import Optional, Union, Callable, Any, Sequence, Dict
 
 import numpy as np
 from river.metrics.base import Metric
 
 from ixai.imputer import BaseImputer
 from ixai.storage.base import BaseStorage
-from .base import BaseIncrementalFeatureImportance
+from ixai.explainer.base import BaseIncrementalFeatureImportance
 
 
 __all__ = ["IncrementalPFI"]
@@ -25,9 +25,9 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
     """
     def __init__(
             self,
-            model_function: Callable,
-            loss_function: Union[Callable, Metric],
-            feature_names: list,
+            model_function: Callable[[Any], Any],
+            loss_function: Union[Metric, Callable[[Any, Dict], float]],
+            feature_names: Sequence[Union[str, int, float]],
             storage: Optional[BaseStorage] = None,
             imputer: Optional[BaseImputer] = None,
             n_inner_samples: int = 1,
@@ -36,32 +36,36 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
     ):
         """
         Args:
-            model_function (Callable): The Model function to be explained.
-            loss_function (Union[Callable, Metric]): The loss function for which the importance values are calculated.
-                This can either be a callable function or a predefined river.metric.base.Metric.<br>
-                - callable function: The loss_function needs to follow the signature of loss_function(y_true, y_pred)
-                    and handle the output dimensions of the model function. Smaller values are interpreted as being
-                    better. y_pred needs to be an array / list with the shape corresponding to the output dimension
-                    (e.g. single-value outputs (e.g. regression, classification): y_pred_1 = [0], y_pred_2 = [1],
-                    etc.; for multi-label outputs (e.g. probability scores) y_pred_1 = [0.72, 0.28],
-                    y_pred_2 = [0.01, 0.99]).<br>
-                - river.metric.base.Metric: Any Metric implemented in river (e.g. river.metrics.CrossEntropy() for
-                    classification or river.metrics.MSE() for regression).
-            feature_names (list): List of feature names to be explained for the model.
-            smoothing_alpha (float): The smoothing parameter for the exponential smoothing of the importance values.
-                Should be in the interval between ]0,1]. Defaults to 0.001.
-            storage (BaseStorage): Optional incremental data storage Mechanism. Defaults to
-                `GeometricReservoirStorage(size=100)` for dynamic modelling settings and to
-                `UniformReservoirStorage(size=100)` in static modelling settings.
-            imputer (BaseImputer): Incremental imputing strategy to be used. Defaults to
+            model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
+                model.predict_one (river), model.predict_proba (sklearn)).
+            loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
+                the importance values are calculated. This can either be a callable function or a
+                predefined river.metric.base.Metric.<br>
+                - river.metric.base.Metric: Any Metric implemented in river (e.g.
+                    river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
+                    regression).<br>
+                - callable function: The loss_function needs to follow the signature of
+                    loss_function(y_true, y_pred) and handle the output dimensions of the model
+                    function. Smaller values are interpreted as being better if not overriden with
+                    `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
+            feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
+                for the model.
+            smoothing_alpha (float, optional): The smoothing parameter for the exponential smoothing
+                of the importance values. Should be in the interval between ]0,1].
+                Defaults to 0.001.
+            storage (BaseStorage, optional): Optional incremental data storage Mechanism.
+                Defaults to `GeometricReservoirStorage(size=100)` for dynamic modelling settings
+                (`dynamic_setting=True`) and `UniformReservoirStorage(size=100)` in static modelling
+                settings (`dynamic_setting=False`).
+            imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
                 `MarginalImputer(sampling_strategy='joint')`.
-            n_inner_samples (int): Number of model evaluation per feature and explanation step (observation).
-                Defaults to 1.
-            dynamic_setting (bool): Flag to indicate if the modelling setting is dynamic `True` (changing model, and
-                adaptive explanation) or a static modelling setting `False` (all observations contribute equally to the
-                final importance) is assumed. Defaults to `True`.
+            n_inner_samples (int): Number of model evaluation per feature and explanation step
+                (observation). Defaults to 1.
+            dynamic_setting (bool): Flag to indicate if the modelling setting is dynamic `True`
+                (changing model, and adaptive explanation) or a static modelling setting `False`
+                (all observations contribute equally to the final importance). Defaults to `True`.
         """
-        super().__init__(
+        super(IncrementalPFI, self).__init__(
             model_function=model_function,
             loss_function=loss_function,
             feature_names=feature_names,
@@ -82,16 +86,13 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
         """Explain one observation (x_i, y_i).
 
         Args:
-            x_i (dict): The input features of the current observation as a dict of feature names to feature
-                values.
+            x_i (dict): The input features of the current observation as a dict of feature names to
+                feature values.
             y_i (Any): Target label of the current observation.
-            update_storage (bool): Flag if the underlying incremental data storage mechanism is to be updated with the
-                new observation (`True`) or not (`False`). Defaults to `True`.
-            n_inner_samples (int, optional): Number of model evaluation per feature for the current explanation step
-                (observation). Overrides the attribute `n_inner_samples` only for the current explanation step.
-                Defaults to `None`.
-            update_storage: (bool): Flag that indicates if the current sample should also be added to the underling
-                data storage mechanism. Defaults to `True`.
+            n_inner_samples (int, optional): Number of model evaluation per feature for the current
+                explanation step (observation). Defaults to `None`.
+            update_storage (bool): Flag if the underlying incremental data storage mechanism is to
+                be updated with the new observation (`True`) or not (`False`). Defaults to `True`.
 
         Returns:
             (dict): The current PFI feature importance scores.
