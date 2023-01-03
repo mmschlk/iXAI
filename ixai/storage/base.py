@@ -10,11 +10,11 @@ class BaseStorage(ABC):
     """
     @abstractmethod
     def __init__(self):
-        self._storage_x: List[Dict[str, Any]] = []
+        self._storage_x: List[dict] = []
         self._storage_y: List = []
 
     @abstractmethod
-    def update(self, x: Dict[str, Any], y: Optional[Any]):
+    def update(self, x: dict, y: Optional[Any]):
         """Given a data point, it updates the storage.
 
         Args:
@@ -40,4 +40,4 @@ class BaseStorage(ABC):
         Returns:
             List of Features and targets in storage as tuple.
         """
-        return (self._storage_x, self._storage_y)
+        return self._storage_x, self._storage_y

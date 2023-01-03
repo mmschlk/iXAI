@@ -1,7 +1,7 @@
 import numpy as np
 
 from .reservoir_storage import ReservoirStorage
-from typing import Dict, Optional, Any
+from typing import Optional, Any
 import random
 
 
@@ -37,7 +37,7 @@ class UniformReservoirStorage(ReservoirStorage):
                 self.size + (np.floor(np.log(random.random()) / np.log(1 - self._algo_wt)) + 1)
         )
 
-    def update(self, x: Dict, y: Optional[Any] = None):
+    def update(self, x: dict, y: Optional[Any] = None):
         """Updates the reservoir with the current sample if necessary.
 
         The update mechanism follows the optimal algorithm as stated here:
@@ -45,7 +45,7 @@ class UniformReservoirStorage(ReservoirStorage):
 
         Args:
             x (dict): Current observation's features.
-            y (Optional): Current observation's label. Defaults to None.
+            y (Any, optional): Current observation's label. Defaults to None.
         """
         self.stored_samples += 1
         if self.stored_samples <= self.size:

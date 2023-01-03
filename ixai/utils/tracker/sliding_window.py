@@ -18,10 +18,8 @@ class SlidingWindowTracker(Tracker):
     def update(self, value_i: Union[int, float]) -> "Tracker":
         """Adds one value to the Tracker
 
-        Parameters
-        ----------
-        value_i : number (int or float)
-            numeric value to be added to the tracker
+        Args:
+            value_i (int or float): The numeric value to be added to the tracker.
         """
         if self.window_k < self.k:
             self.sliding_window[self.window_k] = value_i
@@ -32,7 +30,7 @@ class SlidingWindowTracker(Tracker):
         return self
 
     def __call__(self, *args, **kwargs):
-        """Returns the current mean of the sliding window"""
+        """Returns the current mean of the sliding window."""
         return self.mean
 
     def __repr__(self):
@@ -40,15 +38,15 @@ class SlidingWindowTracker(Tracker):
 
     @property
     def mean(self):
-        """Returns the current mean of the sliding window"""
+        """Returns the current mean of the sliding window."""
         return float(np.nanmean(self.sliding_window, axis=0))
 
     @property
     def var(self):
-        """Returns the variance of the sliding window"""
+        """Returns the variance of the sliding window."""
         return float(np.nanvar(self.sliding_window, axis=0))
 
     @property
     def std(self):
-        """Returns the standard deviation of the sliding window"""
+        """Returns the standard deviation of the sliding window."""
         return float(np.nanstd(self.sliding_window, axis=0))

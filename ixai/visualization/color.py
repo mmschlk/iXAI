@@ -1,4 +1,4 @@
-from typing import Optional, Generator, Any, Iterable
+from typing import Optional, Generator, Any, Iterable, List
 
 BASE_COLOR = '#a6a7a9'  # base color for elements in a plot that should not be highlighted / colored
 BACKGROUND_COLOR = '#f8f8f8'  # background color of plot objects (canvas)
@@ -12,7 +12,7 @@ STD_ALPHA = 0.25  # alpha-channel value for std tunnel around an element (line) 
 def get_color_with_generator(
         color_generator: Generator[str, None, None],
         item_id: Optional[Any] = None,
-        color_item_ids: Optional[list[Any]] = None,
+        color_item_ids: Optional[List[Any]] = None,
         base_color: Optional[str] = None
 ) -> str:
     if base_color is None:
@@ -24,7 +24,7 @@ def get_color_with_generator(
 
 
 def color_list_generator(
-        color_list: Optional[list[str]] = None
+        color_list: Optional[List[str]] = None
 ) -> Iterable[str]:
     if color_list is None:
         color_list = DEFAULT_COLOR_LIST

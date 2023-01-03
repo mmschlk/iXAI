@@ -1,10 +1,11 @@
-from .base import BaseIncrementalExplainer, BaseIncrementalFeatureImportance
+"""
+This modul gathers the explainers.
+"""
+
 from .pfi import IncrementalPFI
 from .sage import IncrementalSage, BatchSage, IntervalSage
 
 __all__ = [
-    "BaseIncrementalExplainer",
-    "BaseIncrementalFeatureImportance",
     "IncrementalPFI",
     "IncrementalSage",
     "BatchSage",

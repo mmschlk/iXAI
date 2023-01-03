@@ -9,6 +9,7 @@ import random
 
 EPS = 0.0000001
 
+
 class TreeImputer(BaseImputer):
     def __init__(
             self,
@@ -33,7 +34,13 @@ class TreeImputer(BaseImputer):
         feature_value = random.choices(population=feature_values, weights=feature_weights, k=n_samples)[0]
         return feature_value
 
-    def _sample_num_feature(self, feature_name: str, feature_model: HoeffdingTreeRegressor, x_i: dict, n_samples: int = 1):
+    def _sample_num_feature(
+            self,
+            feature_name: str,
+            feature_model: HoeffdingTreeRegressor,
+            x_i: dict,
+            n_samples: int = 1
+    ):
         x_i_pred = {**x_i}
         _ = x_i_pred.pop(feature_name)
         if not self.direct_predict_numeric:
@@ -75,7 +82,6 @@ class TreeImputer(BaseImputer):
         return sampled_feature_value
 
     def impute(self, feature_subset, x_i, n_samples: int = 1):
-        x_original_data = {feature_name: x_i[feature_name] for feature_name in x_i.keys() if feature_name not in feature_subset}
         predictions = []
         for _ in range(n_samples):
             sampled_values = {}

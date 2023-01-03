@@ -15,12 +15,30 @@ from ..utils.tracker.welford import WelfordTracker
 from .base import BaseStorage
 
 
-def walk_through_tree(node, x_i, until_leaf=True) -> typing.Iterable[typing.Union["Branch", "Leaf"]]:
+def get_all_tree_paths(node, walked_path: str = '', paths=None) -> List[str]:
+    if paths is None:
+        paths = []
+    try:
+        children = node.children
+        for branch_no, child in enumerate(children):
+            child_path = walked_path + "|".join((str(node), str(node.repr_split), str(branch_no))) + "|STOP|"
+            _ = get_all_tree_paths(child, walked_path=child_path, paths=paths)
+    except AttributeError:
+        walked_path += str(node) + "|STOP|"
+        paths.append(walked_path)
+    return paths
+
+
+def walk_through_tree(
+        node: typing.Union["Branch", "Leaf"],
+        x_i: dict,
+        until_leaf: bool = True
+) -> typing.Iterable[typing.Union["Branch", "Leaf"]]:
     """Traverses a decision tree given a data point, and a starting node.
 
     Args:
         node: Target as float or integer
-        x_i (dict[str, Any]): Data point as Dicts.
+        x_i (dict): Data point as Dicts.
         until_leaf (bool): Flag weather to traverse the tree until a leaf node (``True``) or
             just the next node (``False``).
 
@@ -87,13 +105,20 @@ class TreeStorage(BaseStorage):
         feature_names (list[str]): List of features stored.
         cat_feature_names (list[str]): List of categorical features stored.
         num_feature_names (list[str]): List of numerical features stored.
-        performances (dict[str, Union[R2, Accuracy]]): Dictionary of performance metrics per incremental decision tree
+        performances (dict[Any, Union[R2, Accuracy]]): Dictionary of performance metrics per incremental decision tree
             for each feature stored.
         data_reservoirs (dict[str, dict]): Dictionary of data reservoirs for each feature and leaf nodes.
     """
 
-    def __init__(self, cat_feature_names: List[str], num_feature_names: List[str],
-                 max_depth: int = 5, leaf_reservoir_length: int = 10):
+    def __init__(
+            self,
+            cat_feature_names: list,
+            num_feature_names: list,
+            max_depth: int = 5,
+            leaf_reservoir_length: int = 10,
+            grace_period: int = 200,
+            seed: Optional[int] = None
+    ):
         """ A Tree Storage that trains incremental decision trees for each feature.
 
         Args:
@@ -102,18 +127,23 @@ class TreeStorage(BaseStorage):
             max_depth (int): Maximum tree depth for the incremental decision trees. Defaults to 5.
             leaf_reservoir_length (int): Size of the reservoir stored at each leaf node of each feature's incremental
                 decision tree. Defaults to 10.
+            grace_period (int): Grace period of the underlying river Hoeffding Adaptive Trees. Defaults to 200.
+            seed (int, optional): Random seed of the underlying river Hoeffding Adaptive Trees. Defaults to None.
         """
         self.feature_names = cat_feature_names + num_feature_names
         self.cat_feature_names = cat_feature_names
         self.num_feature_names = num_feature_names
         self._leaf_reservoir_length = leaf_reservoir_length
+        self._seen_samples = 0
 
         self._storage_x = {cat_feature: HoeffdingAdaptiveTreeClassifier(
-            max_depth=max_depth, leaf_prediction='nba', binary_split=True)
+            max_depth=max_depth, leaf_prediction='nba', binary_split=True,
+            grace_period=grace_period, seed=seed)
             for cat_feature in self.cat_feature_names}
         self._storage_x.update(
             {num_feature: HoeffdingAdaptiveTreeRegressor(
-                max_depth=max_depth, leaf_prediction='adaptive', binary_split=True)
+                max_depth=max_depth, leaf_prediction='adaptive', binary_split=True,
+                grace_period=grace_period, seed=seed)
                 for num_feature in self.num_feature_names})
 
         self.performances = {num_feature: Rolling(R2(), window_size=1000) for num_feature in self.num_feature_names}
@@ -127,7 +157,7 @@ class TreeStorage(BaseStorage):
 
         Args:
             x: Features as List of Dicts
-            y: Target as float or integer
+            y: Target as float or integer (not used)
 
         Returns:
             None
@@ -141,6 +171,7 @@ class TreeStorage(BaseStorage):
                 self._update_data_reservoirs(feature_name, x_i, x)
                 pred_i = feature_model.predict_one(x_i)
                 self.performances[feature_name].update(y_i, pred_i)
+        self._seen_samples += 1
 
     @staticmethod
     def get_path_through_tree(node, x_i) -> str:
@@ -176,10 +207,10 @@ class TreeStorage(BaseStorage):
         if leaf_id not in data_reservoir:
             data_reservoir[leaf_id] = GeometricReservoirStorage(
                 size=self._leaf_reservoir_length, store_targets=False, constant_probability=1.0)
-            self._delete_old_reservoir_if_necessary(leaf_id, feature_name)
+            self._delete_outdated_reservoirs(feature_name, root_node)
         data_reservoir[leaf_id].update(x)
 
-    def __call__(self, feature_name: str) -> Tuple[Union[HoeffdingTreeRegressor, HoeffdingTreeClassifier], str]:
+    def __call__(self, feature_name: Any) -> Tuple[Union[HoeffdingTreeRegressor, HoeffdingTreeClassifier], str]:
         """Given a feature name, returns the associated data reservoirs.
 
         Args:
@@ -198,17 +229,19 @@ class TreeStorage(BaseStorage):
         else:
             raise ValueError(f"The {feature_name} is not stored.")
 
-    def _delete_old_reservoir_if_necessary(self, leaf_id: str, feature_name: str):
-        """Delete the reservoir that is outdated if a new path is added.
+    def _delete_outdated_reservoirs(self, feature_name: str, root_node: typing.Union["Branch", "Leaf"]):
+        """Deletes the outdated reservoirs that no longer are part of all paths in the decision trees.
 
         Args:
-            leaf_id (str): The str path through the tree where each nodes are seperated with a `|STOP|`.
             feature_name (str): The feature name for which outdated leafs might be deleted.
+            root_node ("Branch", "Leaf"): The root node of the feature decision tree.
         """
+        all_leafs = get_all_tree_paths(root_node)
+        reservoirs_labels = list(self.data_reservoirs[feature_name].keys())
+        for reservoirs_label in reservoirs_labels:
+            if reservoirs_label not in all_leafs:
+                del self.data_reservoirs[feature_name][reservoirs_label]
 
-        steps = leaf_id.split('|STOP|')[0:-1]
-        previous_reservoir_id = '|STOP|'.join([*steps[0:-2], steps[-1]]) + '|STOP|'
-        if len(steps) > 1:
-            reservoir_ids = set(self.data_reservoirs[feature_name].keys())
-            if previous_reservoir_id in reservoir_ids:
-                del self.data_reservoirs[feature_name][previous_reservoir_id]
+    def __len__(self):
+        """Returns the number of samples observed in the storage object."""
+        return self._seen_samples
