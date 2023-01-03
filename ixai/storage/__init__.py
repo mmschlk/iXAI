@@ -5,6 +5,7 @@ from .uniform_reservoir_storage import UniformReservoirStorage
 from .geometric_reservoir_storage import GeometricReservoirStorage
 from .sequence_storage import SequenceStorage
 from .tree_storage import TreeStorage
+from .base import BaseStorage
 
 __all__ = [
     "UniformReservoirStorage",
@@ -13,5 +14,6 @@ __all__ = [
     "BatchStorage",
     "IntervalStorage",
     "SequenceStorage",
-    "TreeStorage"
+    "TreeStorage",
+    "BaseStorage"
 ]

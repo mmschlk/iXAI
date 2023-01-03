@@ -1,11 +1,11 @@
-:github_url: https://github.com/mmschlk/IncrementExplain.git
+:github_url: https://github.com/mmschlk/iXAI.git
 
 .. _storage:
 
 Storage
 =======
 
-.. currentmodule:: increment_explain.storage
+.. currentmodule:: ixai.storage
 
 
 .. autosummary::
@@ -19,7 +19,7 @@ Storage
     UniformReservoirStorage
     GeometricReservoirStorage
 
-General Protocols and Base Classes
+Base and Derived Classes
 ----------------------------------
 
 Base Storage

@@ -1,4 +1,4 @@
-:github_url: https://github.com/mmschlk/IncrementExplain.git
+:github_url: https://github.com/mmschlk/iXAI.git
 
 API Reference
 =============
@@ -7,3 +7,4 @@ API Reference
     :maxdepth: 1
 
     storage
+    explainer

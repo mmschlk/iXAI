@@ -1,4 +1,4 @@
-:github_url: https://github.com/mmschlk/IncrementExplain.git
+:github_url: https://github.com/mmschlk/iXAI.git
 
 Contribution Guideline
 ======================
