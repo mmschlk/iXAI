@@ -1,5 +1,9 @@
-from .base import BaseStorage
+"""
+This module contains the batch storage.
+"""
 from typing import Any, Optional
+
+from .base import BaseStorage
 
 
 class BatchStorage(BaseStorage):

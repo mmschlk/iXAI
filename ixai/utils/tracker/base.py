@@ -1,8 +1,8 @@
-# Authors: Maximilian Muschalik <maximilian.muschalik@lmu.de>
-#          Fabian Fumagalli <ffumagalli@techfak.uni-bielefeld.de>
-#          Rohit Jagtani
-
+"""
+This module contains base Trackers
+"""
 import abc
+
 import numpy as np
 
 

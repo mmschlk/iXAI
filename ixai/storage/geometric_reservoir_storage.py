@@ -1,6 +1,10 @@
-from .reservoir_storage import ReservoirStorage
-from typing import Optional, Any
+"""
+This module contains the GeometricReservoirStorage.
+"""
 import random
+from typing import Optional, Any
+
+from .reservoir_storage import ReservoirStorage
 
 
 class GeometricReservoirStorage(ReservoirStorage):
@@ -17,7 +21,6 @@ class GeometricReservoirStorage(ReservoirStorage):
             size=size,
             store_targets=store_targets
         )
-        super(ReservoirStorage, self).__init__()
         if constant_probability is not None:
             self.constant_probability = constant_probability
         else:

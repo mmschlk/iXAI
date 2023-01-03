@@ -1,18 +1,23 @@
+"""
+This module contains the TreeStorage and the MeanVarRegressor leaf classifier.
+"""
 import typing
 from typing import Dict, Any, Optional, List, Union, Tuple
 import random
-import numpy as np
 
+import numpy as np
 from river import base
 from river.tree import HoeffdingAdaptiveTreeClassifier, HoeffdingAdaptiveTreeRegressor, \
     HoeffdingTreeRegressor, HoeffdingTreeClassifier
 from river.metrics import R2, Accuracy
 from river.utils import Rolling
 
+from ixai.utils.tracker.welford import WelfordTracker
+from storage.geometric_reservoir_storage import GeometricReservoirStorage
+from storage.base import BaseStorage
 
-from .geometric_reservoir_storage import GeometricReservoirStorage
-from ..utils.tracker.welford import WelfordTracker
-from .base import BaseStorage
+
+NODE_SEPERATOR: str = "|STOP|"
 
 
 def get_all_tree_paths(node, walked_path: str = '', paths=None) -> List[str]:
@@ -21,10 +26,11 @@ def get_all_tree_paths(node, walked_path: str = '', paths=None) -> List[str]:
     try:
         children = node.children
         for branch_no, child in enumerate(children):
-            child_path = walked_path + "|".join((str(node), str(node.repr_split), str(branch_no))) + "|STOP|"
+            child_path = walked_path + "|".join((str(node), str(node.repr_split), str(branch_no)))
+            child_path += NODE_SEPERATOR
             _ = get_all_tree_paths(child, walked_path=child_path, paths=paths)
     except AttributeError:
-        walked_path += str(node) + "|STOP|"
+        walked_path += str(node) + NODE_SEPERATOR
         paths.append(walked_path)
     return paths
 
@@ -162,7 +168,7 @@ class TreeStorage(BaseStorage):
         Returns:
             None
         """
-        for feature_name, feature_value in x.items():
+        for feature_name in x.keys():
             if feature_name in self.feature_names:
                 feature_model = self._storage_x[feature_name]
                 x_i = {**x}
@@ -190,7 +196,7 @@ class TreeStorage(BaseStorage):
             walked_path += str(stop)
             if hasattr(stop, 'repr_split'):
                 walked_path += "|" + str(stop.repr_split) + "|" + str(stop.branch_no(x_i))
-            walked_path += "|STOP|"
+            walked_path += NODE_SEPERATOR
         return walked_path
 
     def _update_data_reservoirs(self, feature_name, x_i, x):
