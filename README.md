@@ -29,3 +29,10 @@ Please help us in improving our work by contributing or pointing to issues. We w
 ```sh
 pip install ixai
 ```
+
+## Build docs locally
+
+1. Go to `docs/` and install the requirements: `cd docs/ && pip install -r requirements_doc.txt`.
+2. Now the current directory should be under `docs/`. Build the html webpage: `make html`.
+3. Go to `docs/build/` and then host the webpage locally: `cd build/ && python -m http.server <port> `, where `port` is a number (e.g., 1234).
+4. Open the webpage `localhost:<port>` in a browser.
