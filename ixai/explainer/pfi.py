@@ -95,7 +95,7 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
                 be updated with the new observation (`True`) or not (`False`). Defaults to `True`.
 
         Returns:
-            (dict): The current SAGE feature importance scores.
+            (dict): The current PFI feature importance scores.
         """
         if self.seen_samples >= 1:
             if n_inner_samples is None:
