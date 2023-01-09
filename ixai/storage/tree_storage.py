@@ -13,8 +13,8 @@ from river.metrics import R2, Accuracy
 from river.utils import Rolling
 
 from ixai.utils.tracker.welford import WelfordTracker
-from storage.geometric_reservoir_storage import GeometricReservoirStorage
-from storage.base import BaseStorage
+from .geometric_reservoir_storage import GeometricReservoirStorage
+from .base import BaseStorage
 
 
 NODE_SEPERATOR: str = "|STOP|"
