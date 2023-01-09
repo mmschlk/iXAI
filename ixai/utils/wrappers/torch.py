@@ -1,4 +1,5 @@
 import typing
+import warnings
 
 from ixai.utils.wrappers.base import Wrapper
 
@@ -87,6 +88,8 @@ class TorchSupervisedLearningWrapper(Wrapper):
     """
 
     def __init__(self, model, optimizer, loss_function, n_classes: int = 1, class_labels: list = None):
+        warnings.warn("TorchSupervisedLearningWrapper is deprecated and will be removed in future"
+                      " releases.", DeprecationWarning)
         super().__init__(prediction_function=None, feature_names=None)
         self.model = model
         self.optimizer = optimizer
