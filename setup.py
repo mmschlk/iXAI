@@ -30,7 +30,8 @@ dev_packages = [
     "pytest",
     "scikit-learn",
     "flake8",
-    "torch"
+    "torch",
+    "openml"
 ]
 
 doc_packages = [
