@@ -88,6 +88,7 @@ class IntervalSage(BatchSage):
             n_inner_samples: Optional[int] = None,
             update_storage: bool = True,
             force_explain: bool = False,
+            verbose: bool = True
     ) -> dict:
         """Explain one observation (x_i, y_i) if enough time between the last explanation and now
             has passed (`interval_length`).
@@ -103,6 +104,8 @@ class IntervalSage(BatchSage):
             force_explain (bool): Overrides the `interval_length` restriction and explains the
                 current sample. This does not override the set `interval_length` globally, such that
                 the explainer is still run in the same rhythm as before.
+            verbose (bool): Flag indicating if the explanation should print to console (`True`) or
+                not (`False`).
 
         Returns:
             (dict): The current SAGE feature importance scores.
@@ -113,5 +116,6 @@ class IntervalSage(BatchSage):
         if not force_explain and self.seen_samples % self.interval_length != 0:
             return self.importance_values
         x_data, y_data = self._storage.get_data()
-        super().explain_many(x_data=x_data, y_data=y_data, n_inner_samples=n_inner_samples)
+        super().explain_many(x_data=x_data, y_data=y_data, n_inner_samples=n_inner_samples,
+                             verbose=verbose)
         return self.importance_values

@@ -90,8 +90,9 @@ class BatchSage:
             self,
             x_i,
             y_i,
-            n_inner_samples: Optional[int] = 1,
-            original_sage: bool = False
+            n_inner_samples: Optional[int] = None,
+            original_sage: bool = False,
+            verbose: bool = True
     ) -> dict:
         """Explain one observation (x_i, y_i) with all data stored.
 
@@ -111,17 +112,18 @@ class BatchSage:
         x_data, y_data = self._storage.get_data()
         if original_sage:
             self.explain_many_original(
-                x_data=x_data, y_data=y_data, n_inner_samples=n_inner_samples)
+                x_data=x_data, y_data=y_data, n_inner_samples=n_inner_samples, verbose=verbose)
         else:
             self.explain_many(
-                x_data=x_data, y_data=y_data, n_inner_samples=n_inner_samples)
+                x_data=x_data, y_data=y_data, n_inner_samples=n_inner_samples, verbose=verbose)
         return self.importance_values
 
     def explain_many(
             self,
             x_data: List[dict],
             y_data: List[Any],
-            n_inner_samples: Optional[int] = None
+            n_inner_samples: Optional[int] = None,
+            verbose: bool = True
     ) -> dict:
         """Explain one observation (x_i, y_i) with all data stored.
 
@@ -131,6 +133,8 @@ class BatchSage:
             y_data (List[Any]): Target label of the current observation.
             n_inner_samples (int, optional): Number of model evaluation per feature for the current
                 explanation step (observation). Defaults to `None`.
+            verbose (bool): Flag indicating if the explanation should print to console (`True`) or
+                not (`False`).
 
         Returns:
             (dict): The current SAGE feature importance scores.
@@ -141,7 +145,8 @@ class BatchSage:
         n_data = len(x_data)
         all_predictions = self._model_function(x_data)
         marginal_prediction = _get_mean_model_output(all_predictions)
-        for n, (x_i, y_i) in tqdm(enumerate(zip(x_data, y_data), start=1), total=n_data):
+        for n, (x_i, y_i) in tqdm(enumerate(zip(x_data, y_data), start=1), total=n_data,
+                                  disable=not verbose):
             permutation_chain = np.random.permutation(self.feature_names)
             loss_previous = self._loss_function(y_true=y_i, y_prediction=marginal_prediction)
             features_not_in_s = set(self.feature_names)
@@ -166,7 +171,8 @@ class BatchSage:
             self,
             x_data: List[dict],
             y_data: List[Any],
-            n_inner_samples: Optional[int] = None
+            n_inner_samples: Optional[int] = None,
+            verbose: bool = True
     ) -> dict:
         """Explain one observation (x_i, y_i) with all data stored according to the original
         definition in https://arxiv.org/abs/2004.00668.
@@ -177,6 +183,8 @@ class BatchSage:
             y_data (List[Any]): Target label of the current observation.
             n_inner_samples (int, optional): Number of model evaluation per feature for the current
                 explanation step (observation). Defaults to `None`.
+            verbose (bool): Flag indicating if the explanation should print to console (`True`) or
+                not (`False`).
 
         Returns:
             (dict): The current SAGE feature importance scores.
@@ -187,7 +195,8 @@ class BatchSage:
         n_data = len(x_data)
         all_predictions = self._model_function(x_data)
         marginal_prediction = _get_mean_model_output(all_predictions)
-        for n, (x_i, y_i) in tqdm(enumerate(zip(x_data, y_data), start=1), total=n_data):
+        for n, (x_i, y_i) in tqdm(enumerate(zip(x_data, y_data), start=1), total=n_data,
+                                  disable=not verbose):
             permutation_chain = np.random.permutation(self.feature_names)
             x_s = {}
             loss_previous = self._loss_function(y_true=y_i, y_prediction=marginal_prediction)
