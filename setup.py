@@ -20,10 +20,13 @@ with io.open(os.path.join(wrkdir, "README.md"), encoding="utf-8") as f:
 
 base_packages = [
     "river",
-    "matplotlib",
     "pandas",
     "numpy",
     "tqdm"
+]
+
+plot_packages = [
+    "matplotlib"
 ]
 
 dev_packages = [
@@ -55,6 +58,7 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=('tests', 'examples', 'docs')),
     install_requires=base_packages,
     extras_require={
+        "plot": base_packages + plot_packages,
         "dev": base_packages + dev_packages,
         "docs": base_packages + dev_packages + doc_packages,
     },
