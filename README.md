@@ -15,13 +15,7 @@
 
 # ixai: Incremental Explainable Artificial Intelligence
 
-This is the first iteration of our incremental explanation package.
-
-Currently, it includes two explanation methods: PFI and SAGE.
-
-Please look at the examples in the `examples` directory.
-
-Please help us in improving our work by contributing or pointing to issues. We will update this iteration soon with further information.
+This is the first iteration of our incremental explanation package. Currently, it includes two explanation methods: PFI and SAGE. Please look at the examples in the `examples` directory. Please help us in improving our work by contributing or pointing to issues. We will update this iteration soon with further information.
 
 ## 🛠 Installation
 **ixai** is intended to work with **Python 3.8 and above**. Installation can be done via `pip`:
