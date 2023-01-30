@@ -5,7 +5,7 @@ except ImportError:
                       "Run `pip install matplotlib` to fix this.")
 
 from .plotting import FeatureImportancePlotter
-from. change_plotter import ChangePlotter
+from .change_plotter import ChangePlotter
 
 __all__ = [
     "FeatureImportancePlotter",
