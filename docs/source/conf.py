@@ -7,9 +7,7 @@ from sphinx.builders.html import StandaloneHTMLBuilder
 import os
 import sys
 sys.path.insert(0, os.path.abspath("../.."))
-
 import ixai
-
 
 # -- Project information ---------------------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -50,7 +48,6 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
 }
 
-
 # -- Options for HTML output -----------------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_theme = 'furo'
@@ -71,9 +68,11 @@ autodoc_default_options = {
 autoclass_content = 'class'
 autodoc_inherit_docstrings = False
 
-# -- For easy copy pasting of code examples --------------------------------------------------------
-StandaloneHTMLBuilder.supported_image_types = ["image/svg+xml", "image/gif", "image/png", "image/jpeg"]
-# -- Extension configuration -------------------------------------------------
+# -- Images ----------------------------------------------------------------------------------------
+StandaloneHTMLBuilder.supported_image_types = [
+    "image/svg+xml", "image/gif", "image/png", "image/jpeg"
+]
+# -- Copy Paste Button -----------------------------------------------------------------------------
 # Ignore >>> when copying code
 copybutton_prompt_text = r">>> |\.\.\. "
 copybutton_prompt_is_regexp = True

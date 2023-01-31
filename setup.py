@@ -38,7 +38,10 @@ dev_packages = [
 ]
 
 doc_packages = [
-    "sphinx"
+    "sphinx",
+    "furo",
+    "sphinx-copybutton",
+    "myst-parser"
 ]
 
 setuptools.setup(
