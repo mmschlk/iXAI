@@ -12,14 +12,17 @@ class SklearnWrapper(Wrapper):
 
     Examples:
         Basic usage:
+
         >>> from sklearn.ensemble import RandomForestClassifier
         >>> model = RandomForestClassifier()
         >>> model_function = SklearnWrapper(model.predict)
 
         For classifiers returning probas:
+
         >>> model_function = SklearnWrapper(model.predict_proba)
 
         If the dict-inputs may be in a different orderings
+
         >>> feature_orderings: list = ['feature_1', 'feature_2', 'feature_3']
         >>> model_function = SklearnWrapper(model.predict, feature_names=feature_orderings)
 

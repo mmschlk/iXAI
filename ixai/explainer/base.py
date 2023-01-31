@@ -23,6 +23,10 @@ class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
     Warning: This class should not be used directly.
     Use derived classes instead.
 
+    Args:
+        model_function (Callable): The Model function to be explained.
+        feature_names (list): List of feature names to be explained for the model.
+
     Attributes:
         feature_names (list[typing.Any]): List of feature names that are explained.
         number_of_features (int): Number of features that are explained.
@@ -35,11 +39,6 @@ class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
             model_function: Callable[[Any], Any],
             feature_names: Sequence[Union[str, int, float]]
     ):
-        """
-        Args:
-            model_function (Callable): The Model function to be explained.
-            feature_names (list): List of feature names to be explained for the model.
-        """
         self._model_function = validate_model_function(model_function)
         self.feature_names = feature_names
         self.number_of_features: int = len(feature_names)

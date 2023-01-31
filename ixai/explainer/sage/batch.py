@@ -24,12 +24,35 @@ class BatchSage:
     an explanation is created with access to all of these observations at once. This can be
     computationally challenging for large amounts of observations.
 
+    Args:
+        model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
+            model.predict_one (river), model.predict_proba (sklearn)).
+        loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
+            the importance values are calculated. This can either be a callable function or a
+            predefined river.metric.base.Metric.<br>
+            - river.metric.base.Metric: Any Metric implemented in river (e.g.
+                river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
+                regression).<br>
+            - callable function: The loss_function needs to follow the signature of
+                loss_function(y_true, y_pred) and handle the output dimensions of the model
+                function. Smaller values are interpreted as being better if not overriden with
+                `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
+        feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
+            for the model.
+        storage (BaseStorage, optional): Optional incremental data storage Mechanism.
+            Defaults to `GeometricReservoirStorage(size=100)` for dynamic modelling settings
+            (`dynamic_setting=True`) and `UniformReservoirStorage(size=100)` in static modelling
+            settings (`dynamic_setting=False`).
+        imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
+            `MarginalImputer(sampling_strategy='joint')`.
+        n_inner_samples (int): Number of model evaluation per feature and explanation step
+            (observation). Defaults to 1.
+
     Attributes:
         feature_names (Sequence[Union[str, int, float]]): The feature names of the dataset.
         n_inner_samples (int): Number of model evaluation per feature and explanation step
             (observation).
     """
-
     def __init__(
             self,
             model_function: Callable[[Any], Any],
@@ -39,31 +62,6 @@ class BatchSage:
             storage: Optional[BaseStorage] = None,
             imputer: Optional[BaseImputer] = None,
     ):
-        """
-        Args:
-            model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
-                model.predict_one (river), model.predict_proba (sklearn)).
-            loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
-                the importance values are calculated. This can either be a callable function or a
-                predefined river.metric.base.Metric.<br>
-                - river.metric.base.Metric: Any Metric implemented in river (e.g.
-                    river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
-                    regression).<br>
-                - callable function: The loss_function needs to follow the signature of
-                    loss_function(y_true, y_pred) and handle the output dimensions of the model
-                    function. Smaller values are interpreted as being better if not overriden with
-                    `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
-            feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
-                for the model.
-            storage (BaseStorage, optional): Optional incremental data storage Mechanism.
-                Defaults to `GeometricReservoirStorage(size=100)` for dynamic modelling settings
-                (`dynamic_setting=True`) and `UniformReservoirStorage(size=100)` in static modelling
-                settings (`dynamic_setting=False`).
-            imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
-                `MarginalImputer(sampling_strategy='joint')`.
-            n_inner_samples (int): Number of model evaluation per feature and explanation step
-                (observation). Defaults to 1.
-        """
         self.feature_names = feature_names
         self.n_inner_samples = n_inner_samples
         self._model_function = validate_model_function(model_function)
@@ -80,6 +78,7 @@ class BatchSage:
 
     def update_storage(self, x_i: dict, y_i: Any):
         """Updates the data storage with one observation (x_i, y_i).
+
         Args:
             x_i (dict): The input features of the current observation.
             y_i (Any): Target label of the current observation.

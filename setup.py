@@ -59,8 +59,8 @@ setuptools.setup(
     install_requires=base_packages,
     extras_require={
         "plot": base_packages + plot_packages,
-        "dev": base_packages + dev_packages,
-        "docs": base_packages + dev_packages + doc_packages,
+        "dev": base_packages + plot_packages + dev_packages,
+        "docs": base_packages + plot_packages + dev_packages + doc_packages,
     },
     include_package_data=True,
     license="MIT",

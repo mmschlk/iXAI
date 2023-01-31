@@ -39,6 +39,7 @@ class Wrapper(metaclass=abc.ABCMeta):
 
         Examples:
             Basic usage:
+
             >>> x_input = {'feature_1': 'value_1', 'feature_2': 2}
             >>> x_array = Wrapper.convert_1d_input_to_arr(x_input)
             >>> print(x_array, x_array.shape)
@@ -64,6 +65,7 @@ class Wrapper(metaclass=abc.ABCMeta):
 
         Examples:
             Basic usage:
+
             >>> x_inputs = [{'feature_1': 'value_1', 'feature_2': 2}, {'feature_1': 'value_1', 'feature_2': 3}]
             >>> x_array = Wrapper.convert_1d_input_to_arr(x_inputs)
             >>> print(x_array, x_array.shape)
@@ -96,6 +98,7 @@ class Wrapper(metaclass=abc.ABCMeta):
 
         Examples:
             Onedimensional Model Output (Labels):
+
             >>> model_output = np.asarray([1])
             >>> Wrapper.convert_arr_output_to_dict(model_output)
             >>> {'output': 1}
@@ -104,6 +107,7 @@ class Wrapper(metaclass=abc.ABCMeta):
             >>> {'output': 1}
 
             Multidimnesnional Model Output (Probas):
+
             >>> model_output = np.asarray([[0.05, 0.5, 0.45]])
             >>> Wrapper.convert_arr_output_to_dict(model_output)
             >>> {0: 0.05, 1: 0.5, 2: 0.45}

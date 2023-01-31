@@ -15,11 +15,13 @@ class RiverWrapper(Wrapper):
 
     Examples:
         Basic usage:
+
         >>> from river.ensemble import AdaptiveRandomForestClassifier
         >>> model = AdaptiveRandomForestClassifier()
         >>> model_function = RiverWrapper(model.predict_one)
 
         For classifiers returning probas:
+
         >>> model_function = RiverWrapper(model.predict_proba_one)
     """
 
@@ -40,7 +42,7 @@ class RiverWrapper(Wrapper):
             return output
 
     def __call__(self, x: typing.Union[typing.List[dict], dict]) -> typing.Union[dict, typing.List[dict]]:
-        """Runs the model and transforms the output into a list or ndarray.
+        """Runs the model and transforms the output into a ``list`` or ``np.ndarray``.
 
         Args:
             x (Union[list, dict]): Input instance as a dictionary of feature value pairs or a list of dictionaries.
