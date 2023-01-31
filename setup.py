@@ -41,7 +41,9 @@ doc_packages = [
     "sphinx",
     "furo",
     "sphinx-copybutton",
-    "myst-parser"
+    "myst-parser",
+    "sphinx-autodoc-typehints",
+    "sphinx-toolbox"
 ]
 
 setuptools.setup(
