@@ -1,4 +1,8 @@
 <p align="center">
+  <!-- Read the Docs -->
+  <a href='https://ixai.readthedocs.io/en/latest/?badge=latest'>
+      <img src='https://readthedocs.org/projects/ixai/badge/?version=latest' alt='Documentation Status' />
+  </a>
   <!-- PyPI Version -->
   <a href="https://pypi.org/project/ixai">
     <img src="https://img.shields.io/pypi/v/ixai.svg?color=blue" alt="PyPi">
