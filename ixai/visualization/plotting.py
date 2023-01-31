@@ -1,6 +1,6 @@
 import copy
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union, Sequence, Dict, List
+from typing import Optional, Union, Sequence, Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 
@@ -71,7 +71,7 @@ class FeatureImportancePlotter(BasePlotter):
 
     def plot(
             self,
-            figsize: Optional[tuple[int, int]] = None,
+            figsize: Optional[Tuple[int, int]] = None,
             model_performances: Optional[Dict[str, Sequence]] = None,
             performance_kw: Optional[dict] = None,
             save_name: Optional[str] = None,

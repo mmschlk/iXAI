@@ -17,6 +17,39 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
     Computes SAGE importance values incrementally by applying exponential smoothing.
     For each input instance tuple x_i, y_i one update of the explanation procedure is performed.
 
+    Args:
+        model_function (Callable): The Model function to be explained (e.g. ``model.predict_one``
+        (river), ``model.predict_proba`` (sklearn)).
+        loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
+            the importance values are calculated. This can either be a callable function or a
+            predefined ``river.metric.base.Metric``.
+                river.metric.base.Metric: Any Metric implemented in river (e.g.
+                ``river.metrics.CrossEntropy()`` for classification or ``river.metrics.MSE()`` for
+                regression).
+                callable function: The loss_function needs to follow the signature of
+                loss_function(y_true, y_pred) and handle the output dimensions of the model
+                function. Smaller values are interpreted as being better if not overriden with
+                ``loss_bigger_is_better=True``. ``y_pred`` is passed as a dict.
+        feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
+            for the model.
+        smoothing_alpha (float, optional): The smoothing parameter for the exponential smoothing
+            of the importance values. Should be in the interval between ]0,1].
+            Defaults to 0.001.
+        storage (BaseStorage, optional): Optional incremental data storage Mechanism.
+            Defaults to ``GeometricReservoirStorage(size=100)`` for dynamic modelling settings
+            (``dynamic_setting=True``) and ``UniformReservoirStorage(size=100)`` in static modelling
+            settings (``dynamic_setting=False``).
+        imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
+            ``MarginalImputer(sampling_strategy='joint')``.
+        n_inner_samples (int): Number of model evaluation per feature and explanation step
+            (observation). Defaults to 1.
+        dynamic_setting (bool): Flag to indicate if the modelling setting is dynamic ``True``
+            (changing model, and adaptive explanation) or a static modelling setting ``False``
+            (all observations contribute equally to the final importance). Defaults to ``True``.
+        loss_bigger_is_better (bool): Flag that indicates if a smaller loss value indicates a
+            better fit ('True') or not ('False').  This is only used to represent the marginal-
+            and model-loss more sensibly.
+
     Attributes:
         marginal_prediction (dict): The current marginal prediction of the model_function
             (smoothed over time).
@@ -26,7 +59,7 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
 
     def __init__(
             self,
-            model_function: Callable[[Any], Any],
+            model_function: Callable,
             loss_function: Union[Metric, Callable[[Any, Dict], float]],
             feature_names: Sequence[Union[str, int, float]],
             *,
@@ -37,40 +70,6 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
             dynamic_setting: bool = True,
             loss_bigger_is_better: bool = False
     ):
-        """
-        Args:
-            model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
-                model.predict_one (river), model.predict_proba (sklearn)).
-            loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
-                the importance values are calculated. This can either be a callable function or a
-                predefined river.metric.base.Metric.<br>
-                - river.metric.base.Metric: Any Metric implemented in river (e.g.
-                    river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
-                    regression).<br>
-                - callable function: The loss_function needs to follow the signature of
-                    loss_function(y_true, y_pred) and handle the output dimensions of the model
-                    function. Smaller values are interpreted as being better if not overriden with
-                    `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
-            feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
-                for the model.
-            smoothing_alpha (float, optional): The smoothing parameter for the exponential smoothing
-                of the importance values. Should be in the interval between ]0,1].
-                Defaults to 0.001.
-            storage (BaseStorage, optional): Optional incremental data storage Mechanism.
-                Defaults to `GeometricReservoirStorage(size=100)` for dynamic modelling settings
-                (`dynamic_setting=True`) and `UniformReservoirStorage(size=100)` in static modelling
-                settings (`dynamic_setting=False`).
-            imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
-                `MarginalImputer(sampling_strategy='joint')`.
-            n_inner_samples (int): Number of model evaluation per feature and explanation step
-                (observation). Defaults to 1.
-            dynamic_setting (bool): Flag to indicate if the modelling setting is dynamic `True`
-                (changing model, and adaptive explanation) or a static modelling setting `False`
-                (all observations contribute equally to the final importance). Defaults to `True`.
-            loss_bigger_is_better (bool): Flag that indicates if a smaller loss value indicates a
-                better fit ('True') or not ('False').  This is only used to represent the marginal-
-                and model-loss more sensibly.
-        """
         super(IncrementalSage, self).__init__(
             model_function=model_function,
             loss_function=loss_function,
@@ -114,9 +113,10 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
                 feature values.
             y_i (Any): Target label of the current observation.
             n_inner_samples (int, optional): Number of model evaluation per feature for the current
-                explanation step (observation). Defaults to `None`.
+                explanation step (observation). Defaults to ``None``.
             update_storage (bool): Flag if the underlying incremental data storage mechanism is to
-                be updated with the new observation (`True`) or not (`False`). Defaults to `True`.
+                be updated with the new observation (``True``) or not (``False``). Defaults to
+                ``True``.
 
         Returns:
             (dict): The current SAGE feature importance scores.

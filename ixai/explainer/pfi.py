@@ -20,6 +20,36 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
     Computes PFI importance values incrementally by applying exponential smoothing.
     For each input instance tuple x_i, y_i one update of the explanation procedure is performed.
 
+    Args:
+        model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
+            model.predict_one (river), model.predict_proba (sklearn)).
+        loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
+            the importance values are calculated. This can either be a callable function or a
+            predefined river.metric.base.Metric.<br>
+            - river.metric.base.Metric: Any Metric implemented in river (e.g.
+                river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
+                regression).<br>
+            - callable function: The loss_function needs to follow the signature of
+                loss_function(y_true, y_pred) and handle the output dimensions of the model
+                function. Smaller values are interpreted as being better if not overriden with
+                `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
+        feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
+            for the model.
+        smoothing_alpha (float, optional): The smoothing parameter for the exponential smoothing
+            of the importance values. Should be in the interval between ]0,1].
+            Defaults to 0.001.
+        storage (BaseStorage, optional): Optional incremental data storage Mechanism.
+            Defaults to `GeometricReservoirStorage(size=100)` for dynamic modelling settings
+            (`dynamic_setting=True`) and `UniformReservoirStorage(size=100)` in static modelling
+            settings (`dynamic_setting=False`).
+        imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
+            `MarginalImputer(sampling_strategy='joint')`.
+        n_inner_samples (int): Number of model evaluation per feature and explanation step
+            (observation). Defaults to 1.
+        dynamic_setting (bool): Flag to indicate if the modelling setting is dynamic `True`
+            (changing model, and adaptive explanation) or a static modelling setting `False`
+            (all observations contribute equally to the final importance). Defaults to `True`.
+
     Attributes:
         n_inner_samples (int): The number of inner_samples used for removing features.
     """
@@ -34,37 +64,6 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
             smoothing_alpha: float = 0.001,
             dynamic_setting: bool = True
     ):
-        """
-        Args:
-            model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
-                model.predict_one (river), model.predict_proba (sklearn)).
-            loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
-                the importance values are calculated. This can either be a callable function or a
-                predefined river.metric.base.Metric.<br>
-                - river.metric.base.Metric: Any Metric implemented in river (e.g.
-                    river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
-                    regression).<br>
-                - callable function: The loss_function needs to follow the signature of
-                    loss_function(y_true, y_pred) and handle the output dimensions of the model
-                    function. Smaller values are interpreted as being better if not overriden with
-                    `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
-            feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
-                for the model.
-            smoothing_alpha (float, optional): The smoothing parameter for the exponential smoothing
-                of the importance values. Should be in the interval between ]0,1].
-                Defaults to 0.001.
-            storage (BaseStorage, optional): Optional incremental data storage Mechanism.
-                Defaults to `GeometricReservoirStorage(size=100)` for dynamic modelling settings
-                (`dynamic_setting=True`) and `UniformReservoirStorage(size=100)` in static modelling
-                settings (`dynamic_setting=False`).
-            imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
-                `MarginalImputer(sampling_strategy='joint')`.
-            n_inner_samples (int): Number of model evaluation per feature and explanation step
-                (observation). Defaults to 1.
-            dynamic_setting (bool): Flag to indicate if the modelling setting is dynamic `True`
-                (changing model, and adaptive explanation) or a static modelling setting `False`
-                (all observations contribute equally to the final importance). Defaults to `True`.
-        """
         super(IncrementalPFI, self).__init__(
             model_function=model_function,
             loss_function=loss_function,

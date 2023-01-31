@@ -16,21 +16,25 @@ class TorchWrapper(Wrapper):
 
     Examples:
         Basic usage:
+
         >>> torch_module: torch.nn.Module = torch_module
         >>> module_device = 'cpu'
         >>> model_function = TorchWrapper(torch_module, device=module_device)
 
         For classifiers returning class_labels:
+
         >>> def link_function_class(x):
         >>>     return torch.argmax(torch.softmax(torch_module(x), dim=-1), dim=-1)
         >>> model_function = TorchWrapper(link_function_class)
 
         For classifiers returning probas:
+
         >>> def link_function_probas(x):
         >>>     return torch.softmax(torch_module(x), dim=-1)
         >>> model_function = TorchWrapper(link_function_probas)
 
-        If the dict-inputs may be in a different orderings
+        If the dict-inputs may be in a different orderings:
+
         >>> feature_orderings: list = ['feature_1', 'feature_2', 'feature_3']
         >>> model_function = TorchWrapper(link_function_probas, feature_names=feature_orderings)
     """
@@ -61,6 +65,10 @@ class TorchWrapper(Wrapper):
             (Union[list[dict], dict]): The model output as a dictionary following river conventions.
 
         Examples:
+            Basic usage:
+
+            >>> def link_function_probas(x):
+            >>>     return torch.softmax(torch_module(x), dim=-1)
             >>> model_function: typing.Callable = TorchWrapper(link_function_probas)
             >>> input_dict = {'feature_1': 1, 'feature_2': 0}
             >>> model_function(input_dict)

@@ -17,13 +17,36 @@ class IntervalSage(BatchSage):
     https://arxiv.org/abs/2004.00668 at set time intervals. A Storage of the last n (specified by
     `storage_length`) observations are kept on which the explanations are created.
 
+    Args:
+        model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
+            model.predict_one (river), model.predict_proba (sklearn)).
+        loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
+            the importance values are calculated. This can either be a callable function or a
+            predefined river.metric.base.Metric.<br>
+            - river.metric.base.Metric: Any Metric implemented in river (e.g.
+                river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
+                regression).<br>
+            - callable function: The loss_function needs to follow the signature of
+                loss_function(y_true, y_pred) and handle the output dimensions of the model
+                function. Smaller values are interpreted as being better if not overriden with
+                `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
+        feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
+            for the model.
+        storage (IntervalStorage, optional): Optional incremental data storage Mechanism.
+            Defaults to `IntervalStorage(size=interval_length)`.
+        imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
+            `MarginalImputer(sampling_strategy='joint')`.
+        n_inner_samples (int): Number of model evaluation per feature and explanation step
+            (observation). Defaults to 1.
+        interval_length (int): Length of the explanation interval after which the explanations
+            are created. Defaults to 1000.
+
     Attributes:
         feature_names (Sequence[Union[str, int, float]]): The feature names of the dataset.
         n_inner_samples (int): Number of model evaluation per feature and explanation step
             (observation).
         seen_samples (int): Number of observations seen.
     """
-
     def __init__(
             self,
             model_function: Callable[[Any], Any],
@@ -35,32 +58,6 @@ class IntervalSage(BatchSage):
             storage: IntervalStorage = None,
             imputer: BaseImputer = None,
     ):
-        """
-        Args:
-            model_function (Callable[[Any], Any]): The Model function to be explained (e.g.
-                model.predict_one (river), model.predict_proba (sklearn)).
-            loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
-                the importance values are calculated. This can either be a callable function or a
-                predefined river.metric.base.Metric.<br>
-                - river.metric.base.Metric: Any Metric implemented in river (e.g.
-                    river.metrics.CrossEntropy() for classification or river.metrics.MSE() for
-                    regression).<br>
-                - callable function: The loss_function needs to follow the signature of
-                    loss_function(y_true, y_pred) and handle the output dimensions of the model
-                    function. Smaller values are interpreted as being better if not overriden with
-                    `loss_bigger_is_better=True`. `y_pred` is passed as a dict.
-            feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
-                for the model.
-            storage (IntervalStorage, optional): Optional incremental data storage Mechanism.
-                Defaults to `IntervalStorage(size=interval_length)`.
-            imputer (BaseImputer, optional): Incremental imputing strategy to be used. Defaults to
-                `MarginalImputer(sampling_strategy='joint')`.
-            n_inner_samples (int): Number of model evaluation per feature and explanation step
-                (observation). Defaults to 1.
-            interval_length (int): Length of the explanation interval after which the explanations
-                are created. Defaults to 1000.
-        """
-
         if storage is None:
             storage = IntervalStorage(store_targets=True, size=storage_length)
         assert isinstance(storage, IntervalStorage), f"Only 'IntervalStorage' expected not " \
