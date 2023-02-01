@@ -63,3 +63,7 @@ pip install ixai
 1000: Accuracy: 0.785, PFI: {'age': 0.22, 'elevel': 0.18, 'zipcode': -0.07, 'salary': 0.04, 'commission': 0.05, 'loan': -0.06, 'car': 0.02, 'hyears': 0.03, 'hvalue': 0.03}
 2000: Accuracy: 0.841, PFI: {'age': 0.26, 'elevel': 0.21, 'zipcode': -0.01, 'salary': 0.02, 'commission': 0.03, 'loan': -0.02, 'car': 0.02, 'hyears': 0.04, 'hvalue': 0.02}
 3000: Accuracy: 0.921, PFI: {'age': 0.28, 'elevel': 0.24, 'zipcode': -0.00, 'salary': 0.00, 'commission': 0.01, 'loan': -0.01, 'car': 0.01, 'hyears': 0.01, 'hvalue': 0.00}
+```
+
+## 📖 Documentation
+The documentation for ``ixai`` can be found [here](https://ixai.readthedocs.io/en/latest/).
