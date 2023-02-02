@@ -1,4 +1,8 @@
 <p align="center">
+  <img height="250px" src="docs/source/_static/ixai_logo.svg" alt="ixai_logo">
+</p>
+
+<p align="center">
   <!-- Read the Docs -->
   <a href='https://ixai.readthedocs.io/en/latest/?badge=latest'>
       <img src='https://readthedocs.org/projects/ixai/badge/?version=latest' alt='Documentation Status' />
@@ -17,8 +21,9 @@
   </a>
 </p>
 
-# ixai: Incremental Explainable Artificial Intelligence
-
+# iXAI: Incremental Explainable Artificial Intelligence
+> Demystifying the black-box, piece by piece.
+                                                                                         
 This is the first iteration of our incremental explanation package. Currently, it includes two explanation methods: PFI and SAGE. Please look at the examples in the `examples` directory. Please help us in improving our work by contributing or pointing to issues. We will update this iteration soon with further information.
 
 ## 🛠 Installation
