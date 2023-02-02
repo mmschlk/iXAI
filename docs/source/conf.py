@@ -52,9 +52,12 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_theme = 'furo'
 html_static_path = ['_static']
-#pygments_style = "sphinx"
+html_logo = "_static/ixai_logo.svg"
+html_favicon = '_static/ixai_favicon.ico'
 pygments_dark_style = "monokai"
-html_theme_options = {}
+html_theme_options = {
+    "sidebar_hide_name": True,
+}
 
 # -- Autodoc ---------------------------------------------------------------------------------------
 autodoc_default_options = {
