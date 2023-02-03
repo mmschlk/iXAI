@@ -12,6 +12,9 @@ sys.path.insert(0, os.path.abspath("../../ixai"))
 
 import ixai
 
+# -- Read the Docs ---------------------------------------------------------------------------------
+master_doc = 'index'
+
 # -- Project information ---------------------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 project = 'ixai'
