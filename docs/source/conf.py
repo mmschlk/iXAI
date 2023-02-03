@@ -6,7 +6,10 @@
 from sphinx.builders.html import StandaloneHTMLBuilder
 import os
 import sys
+sys.path.insert(0, os.path.abspath("../../ixai/storage"))
 sys.path.insert(0, os.path.abspath("../.."))
+sys.path.insert(0, os.path.abspath("../../ixai"))
+
 import ixai
 
 # -- Project information ---------------------------------------------------------------------------
@@ -20,6 +23,7 @@ version = ixai.__version__
 # -- General configuration -------------------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 extensions = [
+    "nbsphinx",
     "sphinx.ext.duration",
     "myst_parser",
     "sphinx.ext.intersphinx",
@@ -46,22 +50,37 @@ source_suffix = {
 intersphinx_mapping = {
     "python3": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
 }
 
 # -- Options for HTML output -----------------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_theme = 'furo'
 html_static_path = ['_static']
-html_logo = "_static/ixai_logo.svg"
 html_favicon = '_static/ixai_favicon.ico'
 pygments_dark_style = "monokai"
 html_theme_options = {
     "sidebar_hide_name": True,
+    "light_logo": "ixai_logo.svg",
+    "dark_logo": "ixai_logo_dark_theme.svg",
+}
+
+html_sidebars = {
+    "**": [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
+    ]
 }
 
 # -- Autodoc ---------------------------------------------------------------------------------------
+autosummary_generate = True
 autodoc_default_options = {
-    'show-inheritance': False,
+    'show-inheritance': True,
     'members': True,
     'member-order': 'groupwise',
     'special-members': '__call__',
