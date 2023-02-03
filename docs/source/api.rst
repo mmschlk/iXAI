@@ -1,83 +1,83 @@
 API Reference
 =============
-This page contains the API reference for public objects and functions in ixai.
+This page contains the API reference for public objects and functions in ``ixai``.
 
 
-.. explainer_api:
+.. autosummary::
+    :toctree: api
+    :recursive:
 
-explainer
+    explainer
+    storage
+    imputer
+    utils
+
+Explainer
 ---------
 .. autosummary::
-   :toctree: generated
+    :nosignatures:
 
-   ixai.explainer
-   ixai.explainer.IncrementalPFI
-   ixai.explainer.IncrementalSage
-   ixai.explainer.IntervalSage
-   ixai.explainer.BatchSage
+    explainer.IncrementalPFI
+    explainer.sage.IncrementalSage
+    explainer.sage.BatchSage
+    explainer.sage.IntervalSage
 
-.. imputer_api:
-
-imputer
+Storage
 -------
 .. autosummary::
-   :toctree: generated
+    :nosignatures:
 
-   ixai.imputer
-   ixai.imputer.DefaultImputer
-   ixai.imputer.MarginalImputer
-   ixai.imputer.TreeImputer
+    storage.GeometricReservoirStorage
+    storage.UniformReservoirStorage
+    storage.TreeStorage
+    storage.IntervalStorage
+    storage.SequenceStorage
+    storage.BatchStorage
 
-.. storage_api:
-
-storage
+Imputer
 -------
 .. autosummary::
-   :toctree: generated
+    :nosignatures:
 
-   ixai.storage
-   ixai.storage.GeometricReservoirStorage
-   ixai.storage.UniformReservoirStorage
-   ixai.storage.TreeStorage
-   ixai.storage.IntervalStorage
-   ixai.storage.SequenceStorage
-   ixai.storage.BatchStorage
+    imputer.DefaultImputer
+    imputer.MarginalImputer
+    imputer.TreeImputer
 
-utils
+Utils
 -----
 .. autosummary::
-   :toctree: generated
+    :nosignatures:
 
-   ixai.utils.wrappers
-   ixai.utils.tracker
-   ixai.utils.validators
+    utils.wrappers
+    utils.tracker
+    utils.validators
 
-wrappers
+Wrappers
 ~~~~~~~~
 .. autosummary::
-   :toctree: generated
+    :nosignatures:
 
-   ixai.utils.wrappers.RiverWrapper
-   ixai.utils.wrappers.TorchWrapper
-   ixai.utils.wrappers.SklearnWrapper
-   ixai.utils.wrappers.RiverMetricToLossFunction
-   ixai.utils.wrappers.base.Wrapper
+    utils.wrappers.RiverWrapper
+    utils.wrappers.TorchWrapper
+    utils.wrappers.SklearnWrapper
+    utils.wrappers.RiverMetricToLossFunction
+    utils.wrappers.base.Wrapper
 
-tracker
+Tracker
 ~~~~~~~
 .. autosummary::
-   :toctree: generated
+    :nosignatures:
 
-   ixai.utils.tracker.SlidingWindowTracker
-   ixai.utils.tracker.ExponentialSmoothingTracker
-   ixai.utils.tracker.WelfordTracker
-   ixai.utils.tracker.MultiValueTracker
-   ixai.utils.tracker.base.Tracker
+    utils.tracker.SlidingWindowTracker
+    utils.tracker.ExponentialSmoothingTracker
+    utils.tracker.WelfordTracker
+    utils.tracker.MultiValueTracker
+    utils.tracker.base.Tracker
 
-validators
+Validators
 ~~~~~~~~~~
 .. autosummary::
-   :toctree: generated
+    :nosignatures:
 
-   ixai.utils.validators.validate_loss_function
-   ixai.utils.validators.validate_model_function
+    utils.validators.validate_loss_function
+    utils.validators.validate_model_function
