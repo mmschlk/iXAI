@@ -39,7 +39,6 @@ dev_packages = [
 
 doc_packages = [
     "sphinx",
-    #"myst_nb",
     "nbsphinx",  # for rendering jupyter notebooks
     "pandoc",  # for rendering jupyter notebooks
     "furo",  # theme of the docs
