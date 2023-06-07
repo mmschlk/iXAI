@@ -5,7 +5,7 @@ import random
 from collections import deque
 from typing import Optional, Any
 
-from ixai import GeometricReservoirStorage
+from .geometric_reservoir_storage import GeometricReservoirStorage
 
 
 class OrderedReservoirStorage(GeometricReservoirStorage):
@@ -18,7 +18,7 @@ class OrderedReservoirStorage(GeometricReservoirStorage):
     def __init__(
             self,
             size: int = 200,
-            constant_probability: float = None,
+            constant_probability: float = 1.,
             store_targets: bool = False
     ):
         super().__init__(
