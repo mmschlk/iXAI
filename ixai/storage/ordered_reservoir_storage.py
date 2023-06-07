@@ -3,10 +3,9 @@ This module contains the OrderedReservoirStorage.
 """
 import random
 from collections import deque
-from typing import Optional, Any, List
+from typing import Optional, Any
 
 from ixai import GeometricReservoirStorage
-from .reservoir_storage import ReservoirStorage
 
 
 class OrderedReservoirStorage(GeometricReservoirStorage):
