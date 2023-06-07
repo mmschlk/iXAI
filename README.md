@@ -58,10 +58,9 @@ pip install ixai
 
 >>> training_metric = Accuracy()
 >>> for (n, (x, y)) in enumerate(stream, start=1)
-...     y_pred = model.predict_one(x)       # inference
-...     training_metric.update(y, y_pred)   # update score
-...     incremental_pfi.explain_one(x, y)   # explaining
-...     model.learn_one(x, y)               # learning
+...     training_metric.update(y, model.predict_one(x))   # inference
+...     incremental_pfi.explain_one(x, y)                 # explaining
+...     model.learn_one(x, y)                             # learning
 ...     if n % 1000 == 0:
 ...         print(f"{n}: Accuracy: {training_metric.get():.3f}, PFI: {incremental_pfi.importance_values}")
 
