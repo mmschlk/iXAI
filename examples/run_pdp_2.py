@@ -56,7 +56,6 @@ if __name__ == "__main__":
         # imputer = DefaultImputer(model, values={'N_1': 5, 'N_2': 3, 'N_10': 2})
         incremental_explainer = IncrementalPDP(
             model_function=model_function,
-            feature_names=feature_names,
             gridsize=8,
             dynamic_setting=True,
             smoothing_alpha=0.1,
