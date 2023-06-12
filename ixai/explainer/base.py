@@ -15,6 +15,9 @@ from ixai.utils.tracker.base import Tracker
 from ixai.utils.tracker import MultiValueTracker, WelfordTracker, ExponentialSmoothingTracker
 from ixai.utils.validators.loss import validate_loss_function
 from ixai.utils.validators.model import validate_model_function
+from matplotlib import pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
@@ -175,3 +178,41 @@ def _get_mean_model_output(model_outputs: List[dict]) -> dict:
     mean_output = {label: sum([output.get(label, 0) for output in model_outputs]) / len(model_outputs)
                    for label in all_labels}
     return mean_output
+
+
+class BasePDP(metaclass=abc.ABCMeta):
+    """Base class for PDP algorithms.
+
+    Warning: This class should not be used directly.
+    Use derived classes instead.
+
+    """
+    @abc.abstractmethod
+    def __init__(
+            self,
+            model_function: Callable[[Any], Any],
+            pdp_feature,
+            gridsize,
+            output_key = 1,
+            ylim=None
+    ):
+        self.model_function = validate_model_function(model_function)
+        self.pdp_feature = pdp_feature
+        self.gridsize = gridsize
+        self.output_key = output_key
+        if ylim is None:
+            self.ylim = (0, 1)
+        else:
+            self.ylim = ylim
+
+    @abc.abstractmethod
+    def explain_one(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _add_ice_curve_to_storage(self, *args, **kwargs):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def plot_pdp(self, *args, **kwargs):
+        raise NotImplementedError

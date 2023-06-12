@@ -1,4 +1,4 @@
-from ixai.explainer.base import BaseIncrementalExplainer
+from ixai.explainer.base import BasePDP
 from ixai.utils.tracker import MultiValueTracker, WelfordTracker, ExponentialSmoothingTracker
 from collections import deque, OrderedDict
 from ixai.storage import BatchStorage
@@ -14,18 +14,15 @@ def no_transform(values):
     return values
 
 
-class IncrementalPDP(BaseIncrementalExplainer):
+class IncrementalPDP(BasePDP):
 
-    def __init__(self, model_function, feature_names,
+    def __init__(self, model_function,
                  pdp_feature, gridsize, storage,
                  smoothing_alpha, dynamic_setting,
                  storage_size, output_key=1, pdp_history_size=10, pdp_history_interval=1000,
-                 min_max_grid: bool = False, **kwargs):
-        super(IncrementalPDP, self).__init__(model_function=model_function, feature_names=feature_names)
-        self.pdp_feature = pdp_feature
-        self.model_function = model_function
-        self.gridsize = gridsize
-        self.ylim = (0., 1)
+                 min_max_grid: bool = False, ylim=None):
+        super(IncrementalPDP, self).__init__(model_function=model_function, pdp_feature=pdp_feature,
+                                             gridsize=gridsize, output_key=output_key, ylim=ylim)
         self._smoothing_alpha = 0.001 if smoothing_alpha is None else smoothing_alpha
         if dynamic_setting:
             assert 0. < smoothing_alpha <= 1., f"The smoothing parameter needs to be in the range" \
@@ -40,14 +37,12 @@ class IncrementalPDP(BaseIncrementalExplainer):
         self.ice_curves_x = deque()
         self.seen_samples = 0
         self.storage = storage
-        # TODO - Remove this
         self.storage_size = storage_size
         self.waiting_period = 20
         self.pdp_storage_x = deque()
         self.pdp_storage_y = deque()
         self.pdp_storage_interval = pdp_history_interval
         self.pdp_storage_size = pdp_history_size
-        self.output_key = output_key
         self.min_max_grid = min_max_grid
         if self.min_max_grid:
             self._max_tracker = ExtremeValueTracker(window_length=1000, size=50)
@@ -231,23 +226,17 @@ class IncrementalPDP(BaseIncrementalExplainer):
         return None, None
 
 
-class BatchPDP:
+class BatchPDP(BasePDP):
 
     def __init__(self, pdp_feature, gridsize, model_function, ylim=None, storage=None, output_key=1):
+        super(BatchPDP, self).__init__(model_function=model_function, pdp_feature=pdp_feature,
+                                       gridsize=gridsize, output_key=output_key, ylim=ylim)
         if storage is None:
             self._storage = BatchStorage(store_targets=False)
         else:
             self._storage = storage
-        self.pdp_feature = pdp_feature
-        self.gridsize = gridsize
-        if ylim is None:
-            self.ylim = (0, 1)
-        else:
-            self.ylim = ylim
-        self.model_function = model_function
         self.ice_curves_y = []
         self.ice_curves_x = []
-        self.output_key = output_key
 
     @property
     def pdp(self):
