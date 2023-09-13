@@ -4,7 +4,7 @@ This module gathers base Explanation Methods
 import copy
 import math
 import abc
-from typing import Union, Sequence, Dict, List, Callable, Any, Optional
+from typing import Union, Dict, List, Callable, Any, Optional
 
 from river.metrics.base import Metric
 
@@ -45,7 +45,7 @@ class BaseIncrementalExplainer(metaclass=abc.ABCMeta):
     def __init__(
             self,
             model_function: Callable[[Any], Any],
-            feature_names: List[str]
+            feature_names: List[Any]
     ):
         self._model_function = validate_model_function(model_function)
         self.feature_names = feature_names
@@ -68,7 +68,7 @@ class BaseIncrementalFeatureImportance(BaseIncrementalExplainer):
             self,
             model_function: Callable[[Any], Any],
             loss_function: Union[Metric, Callable[[Any, Dict], float]],
-            feature_names: Sequence[Union[str, int, float]],
+            feature_names: List[Any],
             storage: Optional[BaseStorage] = None,
             imputer: Optional[BaseImputer] = None,
             dynamic_setting: bool = False,
