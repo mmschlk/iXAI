@@ -1,11 +1,9 @@
 import copy
 import numpy as np
 import pandas as pd
-
 from river.ensemble import AdaptiveRandomForestClassifier
 from river import metrics
 from river.utils import Rolling
-from river.datasets.synth import Agrawal
 from ixai.storage import GeometricReservoirStorage
 from ixai.utils.wrappers import RiverWrapper
 from ixai.explainer.pdp import IncrementalPDP
@@ -14,18 +12,13 @@ from ixai.explainer.pdp import IncrementalPDP
 RANDOM_SEED = 1
 STREAM_LEN = 4000
 if __name__ == "__main__":
-    strm1_rand = np.random.normal(50,25,size = (STREAM_LEN,))
+    strm1_rand = np.random.normal(50, 25, size=(STREAM_LEN,))
     strm1_rand1 = np.random.normal(100, 25, size=(STREAM_LEN,))
-    y_stream1 = np.random.randint(0,2,(STREAM_LEN,))
+    y_stream1 = np.random.randint(0, 2, (STREAM_LEN,))
 
-
-
-    strm2_rand = np.random.normal(1000,25,size = (STREAM_LEN,))
-    print(np.min(strm2_rand))
+    strm2_rand = np.random.normal(1000, 25, size=(STREAM_LEN,))
     strm2_rand1 = np.random.normal(150, 25, size=(STREAM_LEN,))
     y_stream2 = np.random.randint(0, 2, (STREAM_LEN,))
-
-
 
     for i in range(1):
 
@@ -34,7 +27,7 @@ if __name__ == "__main__":
         stream1_df = pd.DataFrame(pd.Series(strm1_rand, name='col1'))
         stream1_df['col2'] = strm1_rand1
         stream_1 = stream1_df.to_dict('records')
-        feature_names = ['col1','col2']
+        feature_names = ['col1', 'col2']
         stream_1 = zip(stream_1, y_stream1)
 
         stream2_df = pd.DataFrame(pd.Series(strm2_rand, name='col1'))
@@ -89,7 +82,7 @@ if __name__ == "__main__":
         # Concept 2 ----------------------------------------------------------------------------------------------------
 
         for (n, (x_i, y_i)) in enumerate(stream_2, start=1):
-            print(x_i)
+            # print(x_i)
             y_i_pred = model.predict_one(x_i)
             training_metric.update(y_true=y_i, y_pred=y_i_pred)
             model.learn_one(x_i, y_i)
