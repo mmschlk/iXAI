@@ -204,13 +204,15 @@ class BasePDP(metaclass=abc.ABCMeta):
             output_key=1,
             ylim=None,
             is_batch_pdp=False,
-            storage_size=None
+            storage_size=None,
+            is_classification=True
     ):
         self.model_function = validate_model_function(model_function)
         self.pdp_feature = pdp_feature
         self.gridsize = gridsize
         self.output_key = output_key
         self.storage_size = storage_size
+        self.is_classification = is_classification
         if ylim is None:
             self.ylim = (0, 1)
         else:
