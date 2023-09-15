@@ -1,7 +1,7 @@
 """
 This module gathers PFI Explanation Methods
 """
-from typing import Optional, Union, Callable, Any, Sequence, Dict
+from typing import Optional, Union, Callable, Any, Sequence, Dict, List
 
 import numpy as np
 from river.metrics.base import Metric
@@ -57,7 +57,7 @@ class IncrementalPFI(BaseIncrementalFeatureImportance):
             self,
             model_function: Callable[[Any], Any],
             loss_function: Union[Metric, Callable[[Any, Dict], float]],
-            feature_names: Sequence[Union[str, int, float]],
+            feature_names: List[Any],
             storage: Optional[BaseStorage] = None,
             imputer: Optional[BaseImputer] = None,
             n_inner_samples: int = 1,
