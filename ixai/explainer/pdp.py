@@ -15,11 +15,13 @@ class IncrementalPDP(BasePDP):
     def __init__(self, model_function,
                  pdp_feature, gridsize, storage,
                  smoothing_alpha, dynamic_setting,
-                 storage_size, output_key=1, pdp_history_size=10, pdp_history_interval=1000,
+                 storage_size, is_classification,
+                 output_key=1, pdp_history_size=10,
+                 pdp_history_interval=1000,
                  min_max_grid: bool = False, ylim=None):
         super(IncrementalPDP, self).__init__(model_function=model_function, pdp_feature=pdp_feature,
-                                             gridsize=gridsize, output_key=output_key, ylim=ylim,
-                                             smoothing_alpha=smoothing_alpha,
+                                             gridsize=gridsize, is_classification=is_classification, output_key=output_key,
+                                             ylim=ylim, smoothing_alpha=smoothing_alpha,
                                              dynamic_setting=dynamic_setting, is_batch_pdp=False)
         self._smoothing_alpha = 0.001 if smoothing_alpha is None else smoothing_alpha
         self.seen_samples = 0
@@ -49,7 +51,8 @@ class IncrementalPDP(BasePDP):
 
     def explain_one(
             self,
-            x_i
+            x_i: dict,
+            update_storage: bool = True
     ):
         # Warm up for explanations
         if self.seen_samples <= self.waiting_period:
@@ -57,7 +60,8 @@ class IncrementalPDP(BasePDP):
                 self._min_tracker.update(x_i[self.pdp_feature])
                 self._max_tracker.update(x_i[self.pdp_feature])
             else:
-                self._storage.update(x=x_i)
+                if update_storage:
+                    self._storage.update(x=x_i)
             self.seen_samples += 1
         else:
 
@@ -74,14 +78,24 @@ class IncrementalPDP(BasePDP):
             feature_grid_dict = OrderedDict({i: value for i, value in enumerate(feature_grid_values)})
             predictions_dict = OrderedDict()
             for i, sampled_feature in enumerate(feature_grid_values):
-                prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})[self.output_key]
+                try:
+                    if self.is_classification:
+                        prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})[self.output_key]
+                    else:
+                        prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})['output']
+                except TypeError:
+                    prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})
+                except KeyError:
+                    print(f"Label not encountered as of sample {self.seen_samples}")
+                    return
                 predictions_dict[i] = prediction
             self._add_ice_curve_to_pdp(ice_curve_y=predictions_dict, ice_curve_x=feature_grid_dict)
             self._add_ice_curve_to_storage(ice_curve_y=predictions_dict, ice_curve_x=feature_grid_dict)
             if self.min_max_grid:
                 self._min_tracker.update(x_i[self.pdp_feature])
                 self._max_tracker.update(x_i[self.pdp_feature])
-            self._storage.update(x=x_i)
+            if update_storage:
+                self._storage.update(x=x_i)
             self.seen_samples += 1
             if self.seen_samples % self.pdp_storage_interval == 0:
                 self._add_pdp_to_storage()
@@ -99,9 +113,10 @@ class IncrementalPDP(BasePDP):
 
 class BatchPDP(BasePDP):
 
-    def __init__(self, pdp_feature, gridsize, model_function, ylim=None, storage=None, output_key=1):
+    def __init__(self, pdp_feature, gridsize, model_function, is_classification, ylim=None, storage=None, output_key=1):
         super(BatchPDP, self).__init__(model_function=model_function, pdp_feature=pdp_feature,
-                                       gridsize=gridsize, output_key=output_key, ylim=ylim, is_batch_pdp=True)
+                                       gridsize=gridsize, is_classification=is_classification, output_key=output_key,
+                                       ylim=ylim, is_batch_pdp=True)
         if storage is None:
             self._storage = BatchStorage(store_targets=False)
         else:
@@ -138,8 +153,14 @@ class BatchPDP(BasePDP):
             predictions = np.empty(shape=self.gridsize)
             for i, sampled_feature in enumerate(feature_grid_values):
                 try:
-                    prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})[self.output_key]
+                    if self.is_classification:
+                        prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})[self.output_key]
+                    else:
+                        prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})['output']
                 except TypeError:
                     prediction = self.model_function({**x_i, self.pdp_feature: sampled_feature})
+                except KeyError:
+                    print(f"Label not encountered yet")
+                    return
                 predictions[i] = prediction
             self._add_ice_curve_to_storage(predictions, feature_grid_values)
