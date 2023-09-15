@@ -1,14 +1,12 @@
 import river.metrics
 from river.utils import Rolling
 from river.ensemble import AdaptiveRandomForestClassifier
-
 from river.datasets.synth import Agrawal
-
 from ixai.explainer.pdp import IncrementalPDP, BatchPDP
 from ixai.storage import GeometricReservoirStorage
 from ixai.utils.wrappers.river import RiverWrapper
 
-N_SAMPLES = 2000
+N_SAMPLES = 4000
 DEBUG = True
 
 if __name__ == "__main__":
@@ -32,13 +30,13 @@ if __name__ == "__main__":
     )
 
     batch_explainer = BatchPDP(pdp_feature='salary',
-                             gridsize=8,
-                             model_function=model_function)
+                               gridsize=8,
+                               model_function=model_function)
 
-    incremental_explainer = IncrementalPDP(feature_names=feature_names, pdp_feature='salary',
-                             gridsize=8, storage=storage, smoothing_alpha=0.1,
-                             model_function=model_function, dynamic_setting=True,
-                             storage_size=100)
+    incremental_explainer = IncrementalPDP(pdp_feature='salary',
+                                           gridsize=8, storage=storage, smoothing_alpha=0.1,
+                                           model_function=model_function, dynamic_setting=True,
+                                           storage_size=100)
 
     # Training Phase -----------------------------------------------------------------------------------------------
     if DEBUG:
@@ -51,7 +49,6 @@ if __name__ == "__main__":
             print(f"{n}: performance {training_metric.get()}\n")
         if n > n_samples:
             break
-
 
     for (n, (x_i, y_i)) in enumerate(stream, start=1):
         incremental_explainer.explain_one(x_i)

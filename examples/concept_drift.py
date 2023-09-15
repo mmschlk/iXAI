@@ -77,7 +77,6 @@ storage = GeometricReservoirStorage(store_targets=False, size=100, constant_prob
 
 incremental_explainer = IncrementalPDP(
     model_function=model_function,
-    feature_names=feature_names,
     gridsize=8,
     dynamic_setting=True,
     smoothing_alpha=0.1,
