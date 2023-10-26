@@ -1,1 +1,1 @@
-SAVE_DPI = 300
+SAVE_DPI = None

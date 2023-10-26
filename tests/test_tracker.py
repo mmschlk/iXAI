@@ -30,3 +30,5 @@ def test_tracker_welford(data_stream):
     assert tracker.mean == pytest.approx(mean)
     assert tracker.var == pytest.approx(var)
     assert tracker.std == pytest.approx(std)
+    assert tracker.N == len(data_stream)
+    

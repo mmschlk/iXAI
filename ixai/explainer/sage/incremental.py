@@ -19,17 +19,21 @@ class IncrementalSage(BaseIncrementalFeatureImportance):
 
     Args:
         model_function (Callable): The Model function to be explained (e.g. ``model.predict_one``
-        (river), ``model.predict_proba`` (sklearn)).
-        loss_function (Union[Metric, Callable[[Any, Dict], float]]): The loss function for which
-            the importance values are calculated. This can either be a callable function or a
-            predefined ``river.metric.base.Metric``.
-                river.metric.base.Metric: Any Metric implemented in river (e.g.
+            for a ``river`` model or ``model.predict_proba`` for a ``sklearn`` classifier).
+
+        loss_function (Union[Metric, Callable]): The loss function for which the importance values
+            are calculated. This can either be a callable function or a predefined
+            ``river.metric.base.Metric``:
+
+            - ``river.metric.base.Metric``: Any Metric implemented in river (e.g.
                 ``river.metrics.CrossEntropy()`` for classification or ``river.metrics.MSE()`` for
                 regression).
-                callable function: The loss_function needs to follow the signature of
+
+            - callable function: The loss_function needs to follow the signature of
                 loss_function(y_true, y_pred) and handle the output dimensions of the model
                 function. Smaller values are interpreted as being better if not overriden with
                 ``loss_bigger_is_better=True``. ``y_pred`` is passed as a dict.
+
         feature_names (Sequence[Union[str, int, float]]): List of feature names to be explained
             for the model.
         smoothing_alpha (float, optional): The smoothing parameter for the exponential smoothing

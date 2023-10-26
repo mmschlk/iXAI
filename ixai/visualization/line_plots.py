@@ -88,7 +88,9 @@ def plot_multi_line_graph(
         v_lines: Optional[List[dict]] = None,
         markevery: Optional[Dict[str, int]] = None,
         tick_right: bool = False,
-        fill_between_props: Optional[List[dict]] = None
+        fill_between_props: Optional[List[dict]] = None,
+        xticklabels: Optional[List[str]] = None,
+        text: Optional[List[dict]] = None
 ) -> plt.axis:
 
     if facet_not_to_highlight is None:
@@ -227,6 +229,8 @@ def plot_multi_line_graph(
     # specify ticks of the x-axis
     if x_ticks is not None:
         axis.set_xticks(x_ticks)
+        if xticklabels is not None:
+            axis.set_xticklabels(xticklabels)
 
     # add vertical lines
     if v_lines is not None:
@@ -239,6 +243,10 @@ def plot_multi_line_graph(
             axis.axhline(**h_line_props)
 
     axis.set_facecolor(BACKGROUND_COLOR)
+
+    if text is not None:
+        for text_to_add in text:
+            axis.text(**text_to_add)
 
     return axis
 
