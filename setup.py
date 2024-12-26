@@ -39,12 +39,12 @@ dev_packages = [
 
 doc_packages = [
     "sphinx",
-    #"myst_nb",
     "nbsphinx",  # for rendering jupyter notebooks
     "pandoc",  # for rendering jupyter notebooks
     "furo",  # theme of the docs
     "sphinx-copybutton",  # easier copy-pasting of code snippets from docs
-    "myst-parser"  # parse md and rst files
+    "myst-parser",  # parse md and rst files
+    "sphinx-autobuild"  # live-reload of docs
 ]
 
 setuptools.setup(
