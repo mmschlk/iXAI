@@ -85,6 +85,7 @@ class RiverMetricToLossFunction:
         """
         if not self._dict_input_metric:
             y_prediction = y_prediction.get('output', 0)
-        loss_i = self._river_metric.update(y_true=y_true, y_pred=y_prediction).get()
+        _ = self._river_metric.update(y_true=y_true, y_pred=y_prediction)
+        loss_i = self._river_metric.get()
         self._river_metric.revert(y_true=y_true, y_pred=y_prediction)
         return loss_i * self._sign
